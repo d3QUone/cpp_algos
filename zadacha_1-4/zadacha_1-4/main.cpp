@@ -13,14 +13,13 @@
 // Дано натуральное число N. Представить N в виде A + B, так, что НОД(A, B) максимален, A <= B.
 // Вывести A и B. Если возможно несколько ответов - вывести ответ с минимальным A. Пример:
 void get_NOD(int N, int* num, int* denum){
-    int NOD = 0;
-    for (int A = 1; 2*A <= N; ++A) {
-        int B = N - A;
-        // ищется максимальное А при котором остаток ноль - т.е А есть НОД 
+    int NOD = 0; int B = 0;
+    for (int A = N/2; A > 0; --A) {
+        // ищется максимальное А при котором остаток ноль - т.е А есть НОД
+        B = N - A;
         if (B % A == 0) {
-            if (A > NOD) {
-                NOD = A;
-            }
+            NOD = A;
+            break;
         }
     }
     *num = NOD;
@@ -33,6 +32,5 @@ int main(int argc, const char * argv[]) {
     std::cin >> N;
     get_NOD(N, &A, &B);
     std::cout << A << " " << B;
-    //std::cout << "\n-----\n" << A << " " << B;
     return 0;
 }
