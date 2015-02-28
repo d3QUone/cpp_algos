@@ -2,7 +2,7 @@
 //  main.cpp
 //  cpp_algos
 //
-//  Created by Владимир on 25.02.15.
+//  Created by Vladimir on 25.02.15.
 //  Copyright (c) 2015 Kasatkin. All rights reserved.
 //
 
@@ -22,9 +22,40 @@ double Power(double a, int n) {
     return result;
 }
 
+
+// 28 feb 2015 updates
+
+// найти все простые числа в [1, n]
 int main(int argc, const char * argv[]) {
-    //std::cout << "Hello, World!\n";
+    // get 'n' from input
+    int maxN = 0;
+    std::cin >> maxN;
     
-    printf("%.1f\n", Power(2, 100));
+    // init bool array
+    bool *isPrime = new bool[maxN + 1];
+    // i*i <= maxN
+    for (int i = 0; i <= maxN; ++i){
+        isPrime[i] = true;
+    }
+    
+    // do Eratosfer stuff
+    for (int i= 2; i <= maxN; ++i){
+        // remove all next kratn nums
+        if (isPrime[i]) {
+            // j = i*i
+            for (int j = 2*i; j <= maxN; j += i ) {
+                isPrime[j] = false;
+            }
+        }
+    }
+    
+    // return result
+    for (int i = 0; i <= maxN; ++i) {
+        if (isPrime[i]) {
+            std::cout << i << " ";
+        }
+    }
+    std::cout << "\n";
+    delete [] isPrime;
     return 0;
 }
