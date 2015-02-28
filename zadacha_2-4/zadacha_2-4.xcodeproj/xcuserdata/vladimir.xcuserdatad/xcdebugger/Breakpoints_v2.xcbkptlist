@@ -10,28 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "zadacha_2-4/main.cpp"
-            timestampString = "446809521.762212"
+            timestampString = "446841705.722886"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "19"
-            endingLineNumber = "19"
-            landmarkName = "kill_counter(int N, int k)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "zadacha_2-4/main.cpp"
-            timestampString = "446809521.762212"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "24"
-            endingLineNumber = "24"
-            landmarkName = "kill_counter(int N, int k)"
+            startingLineNumber = "34"
+            endingLineNumber = "34"
+            landmarkName = "solver(int N, int k)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -9,33 +9,41 @@
 #include <iostream>
 
 
-int kill_counter(int N, int k) {
+int solver(int N, int k) {
     bool *alive_people = new bool[N];
     for (int i = 0; i < N; ++i) {
         alive_people[i] = true;
     }
-    
-    int killed = 0; int ch = 0; // счетчик от 1 до К
-    while (N - killed > 1) {
-        // check and kill ?
-        if ( ch % k == 0) {
-            if (alive_people[ch]) {
-                alive_people[ch] = false;
+    int pos = 0; // absolute position
+    int sch = 0; // counter from 1 to k
+    int killed = 0;
+    while (true) {
+        if (alive_people[pos]) {
+            sch += 1;
+        }
+        if (sch%k == 0) {
+            if (alive_people[pos]) {
+                alive_people[pos] = false; // 'kill'
+                sch = 0; // new loop
                 killed += 1;
-                std::cout << ch + 1<< "\n";
+                //std::cout << pos + 1 << "; killed " << killed << " total\n";
             }
         }
-        ch += k;
-        if (ch >= N) ch -= N; // decrease 'ch'
-    }
-    // find alive one
-    for (int l = 0; l < N; ++l) {
-        if (alive_people[l]) {
-            return l + 1;
+        pos += 1;
+        
+        if (pos >= N) pos -= N; // go to the beginnig (like a circle)
+        if (N - killed == 1) {
+            // one is alive, find him and return
+            for (int l = 0; l < N; ++l) {
+                if (alive_people[l]) {
+                    delete [] alive_people;
+                    return l + 1;
+                }
+            }
         }
     }
     delete [] alive_people;
-    return -1;
+    return -1; // if nothing found
 }
 
 
@@ -43,8 +51,8 @@ int main(int argc, const char * argv[]) {
     int N = 0; int k = 0;
     std::cin >> N >> k;
     
-    int res = kill_counter(N, k);
-    std::cout << "Alive: " << res;
-    
+    int res = solver(N, k);
+    //std::cout << "\nAlive: " << res; // debug
+    std::cout << res; // release
     return 0;
 }
