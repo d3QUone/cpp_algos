@@ -19,7 +19,6 @@
 
 void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
     // find B in A
-    
     int bufer = 0;
     int ret_size = 0;
     for (int i = 0; i < n; ++i) {

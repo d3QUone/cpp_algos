@@ -8,6 +8,24 @@
 
 #include <iostream>
 
+
+// 2 x: pop x front
+// 3 x: push x back
+
+
+
+// - init queue
+// - do
+
+
+class din_que{
+    
+    
+    
+};
+
+
+
 int main(int argc, const char * argv[]) {
     
     // slide 22 example
@@ -16,5 +34,9 @@ int main(int argc, const char * argv[]) {
     for (int i = 1; i < 128; ++i) {
         std::cout << a[i] << " ";
     }
+    
+    
+    
+    
     
 }
