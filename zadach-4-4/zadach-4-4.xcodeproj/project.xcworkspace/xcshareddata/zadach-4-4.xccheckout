@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>9706B2C6-06D6-44F7-93EA-C8D5D4844222</string>
+	<key>IDESourceControlProjectName</key>
+	<string>zadach-4-4</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>A5A31F3AAF407496B62DF7B27941A6F822C96294</key>
+		<string>https://github.com/d3QUone/cpp_algos.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>zadach-4-4/zadach-4-4.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>A5A31F3AAF407496B62DF7B27941A6F822C96294</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/d3QUone/cpp_algos.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>A5A31F3AAF407496B62DF7B27941A6F822C96294</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>A5A31F3AAF407496B62DF7B27941A6F822C96294</string>
+			<key>IDESourceControlWCCName</key>
+			<string>cpp_algos</string>
+		</dict>
+	</array>
+</dict>
+</plist>
