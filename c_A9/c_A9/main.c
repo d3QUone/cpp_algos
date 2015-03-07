@@ -61,10 +61,8 @@ void mail_filter(char** inp, size_t lines, char** out){
 
 int main(){
     // init an array of nulls
-    char** big_array = calloc(MAX_SIZE, sizeof(char* )*MAX_SIZE);
-    for (int i = 0; i < MAX_SIZE; ++i) {
-        big_array[i] = calloc(MAX_SIZE, sizeof(char));
-    }
+    char** big_array = calloc(MAX_SIZE, sizeof(char* ));
+    for (int i = 0; i < MAX_SIZE; ++i) big_array[i] = calloc(MAX_SIZE, sizeof(char));
     
     // fill array while any data
     size_t size = 0;
@@ -81,10 +79,8 @@ int main(){
             free(big_array[i]);
         }
         free(big_array);
-        
         exit(1); // 0 ? 1
     }
-    
     
     /*
     // debug...
@@ -95,7 +91,7 @@ int main(){
     
     
     // init an array of nulls to store result there
-    char** result = calloc(size, sizeof(char* )*MAX_SIZE);
+    char** result = calloc(size, sizeof(char* ));
     for (int i = 0; i < size; ++i) {
         result[i] = calloc(MAX_SIZE, sizeof(char));
     }
