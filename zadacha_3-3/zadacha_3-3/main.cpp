@@ -48,21 +48,15 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
                     if (B[i] > A[mid]) {
                         min = mid;
                     } else if (B[i] == A[mid]) {
+                        p = j;
+                        res[ret_size] = A[mid];
+                        ret_size += 1;
+                        
                         break;
                     } else {
                         max = mid;
                     }
                 }
-                
-                /*
-                for (int x = t_p; x < t_p*2 && x < n; ++x) {
-                    if (A[x] == B[i]) {
-                        p = j;
-                        res[ret_size] = A[x];
-                        ret_size += 1;
-                    }
-                }
-                 */
             }
         }
     }
