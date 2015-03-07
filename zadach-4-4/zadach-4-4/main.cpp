@@ -34,35 +34,37 @@ public:
             int new_data_size = 2*data_size + 1;
             int* buf_data = new int[new_data_size];
             
-//            memcpy(buf_data, data, data_size-head);
-//            if (data_size - tail > 0) {
-//                memcpy(buf_data, data, data_size-tail);
-//            }
+            // resave whole blocks
+            std::cout << "data_size: " << data_size << " head: " << head << "\n";
+            
+            memcpy(buf_data, data, (data_size-head)*sizeof(int));
+            if (data_size - tail > 0 && head > tail) {
+                std::cout << "tail\n";
+                memcpy(buf_data, data, (data_size-tail)*sizeof(int));
+            }
 
             
-            int resave_buffer = 0;
-            for (int i = 0; i < data_size; ++i){
-                resave_buffer = del_item(); // best way to get data from head to tail
-                if (resave_buffer != -1) {
-                    buf_data[i] = resave_buffer;
-                    //std::cout << buf_data[i] << " ";
-                } else {
-                    break;
-                }
-            }
+            // resave item-by-item
+//            int resave_buffer = 0;
+//            for (int i = 0; i < data_size; ++i){
+//                resave_buffer = del_item(); // best way to get data from head to tail
+//                if (resave_buffer != -1) {
+//                    buf_data[i] = resave_buffer;
+//                    //std::cout << buf_data[i] << " ";
+//                } else {
+//                    break;
+//                }
+//            }
             
             *data = *buf_data;
             delete[] buf_data; // release dat buffer-memory
-            data_size = new_data_size;
+            tail = data_size - 1; // new tail, surely last item now
             data[tail] = item; // wrong tail ?
-            tail = (tail + 1) % data_size;
+            data_size = new_data_size;
             head = 0;
             
-//            for (int i = 0; i < data_size; ++i){
-//                std::cout << data[i] << " ";
-//            }
-//            std::cout << "\n";
-            
+            for (int i = 0; i < data_size; ++i) std::cout << data[i] << " ";
+            std::cout << "\n";
         }
     };
     
@@ -87,7 +89,7 @@ int main(int argc, const char * argv[]) {
     // do test cases manually from keybord, n times
     int n = 0; int code = 0; int arg = 0; int buf = 0; int error = -1;
     std::cin >> n;
-    Queue* q1 = new Queue(n); // init dynamic queue
+    Queue* q1 = new Queue(0); // init dynamic queue
     for (int i = 0; i < n; ++i) {
         std::cin >> code >> arg; // get inp
         // codes can be '2' or '3' only
