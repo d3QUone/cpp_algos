@@ -102,6 +102,7 @@ int main(){
     
     for (size_t i = 0; i < size; ++i) {
         printf("%s", result[i]);
+        free(result[i]);
     }
     
     free(big_array); free(result);
