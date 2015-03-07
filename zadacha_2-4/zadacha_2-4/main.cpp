@@ -26,12 +26,12 @@ int solver(int N, int k) {
                 alive_people[pos] = false; // 'kill'
                 sch = 0; // new loop
                 killed += 1;
-                //std::cout << pos + 1 << "; killed " << killed << " total\n";
+                //std::cout << pos + 1 << "; killed " << killed << " total\n"; // debug
             }
         }
         pos += 1;
-        
         if (pos >= N) pos -= N; // go to the beginnig (like a circle)
+        
         if (N - killed == 1) {
             // one is alive, find him and return
             for (int l = 0; l < N; ++l) {
@@ -42,8 +42,6 @@ int solver(int N, int k) {
             }
         }
     }
-    delete [] alive_people;
-    return -1; // if nothing found
 }
 
 

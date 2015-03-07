@@ -22,9 +22,7 @@ public:
         tail = 0;
     };
     
-    ~Queue(){
-        delete [] data;
-    };
+    ~Queue(){ delete[] data; };
     
     // dynamic buffer here
     void add_item( int item ){
@@ -33,9 +31,14 @@ public:
             tail = (tail + 1) % data_size;
         } else {
             // out of buffer_size - re_init 'data', copy from head to tail, return new -> dynamic Q
-            
             int new_data_size = 2*data_size + 1;
             int* buf_data = new int[new_data_size];
+            
+//            memcpy(buf_data, data, data_size-head);
+//            if (data_size - tail > 0) {
+//                memcpy(buf_data, data, data_size-tail);
+//            }
+
             
             int resave_buffer = 0;
             for (int i = 0; i < data_size; ++i){
@@ -47,21 +50,19 @@ public:
                     break;
                 }
             }
-            //std::cout << "\ndone\n";
             
-            data_size = new_data_size;
             *data = *buf_data;
+            delete[] buf_data; // release dat buffer-memory
+            data_size = new_data_size;
             data[tail] = item; // wrong tail ?
             tail = (tail + 1) % data_size;
             head = 0;
-            delete [] buf_data; // release dat buffer-memory
             
-            /*
-            for (int i = 0; i < data_size; ++i){
-                std::cout << data[i] << " ";
-            }
-            std::cout << "\n";
-            */
+//            for (int i = 0; i < data_size; ++i){
+//                std::cout << data[i] << " ";
+//            }
+//            std::cout << "\n";
+            
         }
     };
     
@@ -73,8 +74,7 @@ public:
         }
         return -1; // - means error
     };
-    bool is_empty() { return head == tail; }; // isn't used yet
-    
+    //bool is_empty() { return head == tail; };
 private:
     int data_size;
     int* data;
@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
         // codes can be '2' or '3' only
         if (code == 2) {
             buf = q1 -> del_item();
-            //std::cout << buf << " released\n";
+            std::cout << buf << " released\n";
             if (buf != arg) {
                 error = 1; // - test isnt passed !
             }
