@@ -26,8 +26,7 @@ const char* keys[] = {"Date:", "From:", "To:", "Subject:"}; //printf("%s\n", key
 
 
 void mail_filter(char** inp, size_t lines, char** out){
-    char* line =(char* ) malloc(MAX_SIZE*sizeof(char));
-    //size_t error = 0; // 1 -> return error?
+    char* line = (char* ) malloc(MAX_SIZE*sizeof(char));
     size_t j = 0;
     size_t key_size = 0;
     size_t parsed_ok = 0; // 1 - match, 0 - no matches
@@ -37,8 +36,6 @@ void mail_filter(char** inp, size_t lines, char** out){
         line = inp[i];
         parsed_ok = 1;
         for (size_t t = 0; t < AMOUNT_OF_KEYS; ++t) {
-            //error = 0;
-            
             if (line[0] == keys[t][0]) {
                 j = 1; // cause 0 is alredy passed
                 key_size = strlen(keys[t]);  //printf("\nkey_size: %zu\n", key_size);
@@ -51,20 +48,13 @@ void mail_filter(char** inp, size_t lines, char** out){
                     }
                     j += 1;
                 }
-                
                 if (parsed_ok == 1) {
                     out[current_out_index] = line;
                     current_out_index += 1;
                 }
             }
-//            if (error == 1) {
-//                printf("[error]"); // when???
-//            }
         }
     }
-    
-    if (current_out_index == 0) printf("[error]"); // nothing processed or found
-    
     free(line);
 }
 
@@ -85,6 +75,17 @@ int main(){
     }
     free(buff);
     
+    if (size == 0) {
+        printf("[error]");
+        for (int i = 0; i < MAX_SIZE; ++i) {
+            free(big_array[i]);
+        }
+        free(big_array);
+        
+        exit(1); // 0 ? 1
+    }
+    
+    
     /*
     // debug...
     printf("\n------ check inp ------\ngot %zu lines\n\n", size);
@@ -99,12 +100,17 @@ int main(){
         result[i] = calloc(MAX_SIZE, sizeof(char));
     }
     mail_filter(big_array, size, result);
-    
+
     for (size_t i = 0; i < size; ++i) {
         printf("%s", result[i]);
         free(result[i]);
     }
+    free(result);
     
-    free(big_array); free(result);
+    for (int i = 0; i < MAX_SIZE; ++i) {
+        free(big_array[i]);
+    }
+    free(big_array);
+
     return 0;
 }

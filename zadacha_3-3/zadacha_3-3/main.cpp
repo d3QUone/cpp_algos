@@ -17,16 +17,17 @@
  элемента B[m­1] в массиве A.. В процессе поиска очередного элемента B[i] в массиве A пользуйтесь результатом поиска элемента B[i­1].
 */
 
-
+// finds B in A
 void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
-    // find B in A
-    int log = int(std::log(n)) + 2;
+    int log = int(std::log(n)) + 3; // + 1 to get full, +1 to maximize
     //std::cout << "int(log)+1: " << log << ", log: " << std::log(n);
     
-    int p = 0; // last power of 2
+    int p = 0; // last used power of 2
     int t_p = 1; // 2^p
+    int ret_size = 0; // stores return-arr-size (== last index)
     
-    int ret_size = 0;
+    // binary search init
+    int min = 0; int max = 0; int mid = 0;
     
     // fix 2^0 == 1..
     if (A[0] == B[0]) {
@@ -35,19 +36,33 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
     }
     
     for (int i = 1;  i < m; ++i) {
-        for (int j = p; j < log + 1; ++j) {
+        for (int j = p; j <= log; ++j) {
             
-            t_p = int(pow(2, j)); // buffer, count this power only once
-    
-            if (A[t_p] <= B[i] && A[t_p*2] > B[i]) {
+            t_p = int(pow(2, j)); // bufferize to count this power only once
+            if (A[t_p] <= B[i] && A[2*t_p] > B[i]) {
+                // do binary-search here
+                min = t_p;
+                max = 2*t_p;
+                while (true) {
+                    mid = min + (max - min)/2;
+                    if (B[i] > A[mid]) {
+                        min = mid;
+                    } else if (B[i] == A[mid]) {
+                        break;
+                    } else {
+                        max = mid;
+                    }
+                }
                 
-                for (int x = t_p; x < t_p*2 && x < n ; ++x) {
+                /*
+                for (int x = t_p; x < t_p*2 && x < n; ++x) {
                     if (A[x] == B[i]) {
                         p = j;
                         res[ret_size] = A[x];
                         ret_size += 1;
                     }
                 }
+                 */
             }
         }
     }
