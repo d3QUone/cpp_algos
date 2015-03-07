@@ -28,7 +28,10 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
     int ret_size = 0; // stores return-arr-size (== last index)
     
     // binary search init
-    int min = 0; int max = 0; int mid = 0;
+    // int min = 0; int max = 0;
+    int mid = 0;
+    
+    int saved = 0;
     
     // fix i = 0, cause 2^0 == 1..
     int i = 0; int j = 0;
@@ -38,10 +41,11 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
         i = 1;
     }
     
-    int t1 = 0;
+    //int t1 = 0;
     for (; i < m; ++i) {
-        t1 = B[i];  // just for debug
-        
+        //t1 = B[i];  // just for debug
+        saved = 0;
+
         // seek among powers of 2
         j = p; // last (max used) power of 2
         while (j <= log) {
@@ -59,24 +63,30 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
                 
                 if (A[t_p_2] > B[i]) {
                     // do binary-search here
-                    min = t_p;
-                    max = 2*t_p;
+                    
+                    // min = t_p;   // save some bytes :)
+                    // max = t_p_2;
+                    
                     while (true) {
-                        mid = min + (max - min)/2;
+                        mid = t_p + (t_p_2 - t_p)/2;
                         if (B[i] > A[mid]) {
-                            min = mid;
+                            t_p = mid;
                         } else if (B[i] == A[mid]) {
                             p = j; // j + 1 ??? or dangerous?
                             res[ret_size] = A[mid];
                             ret_size += 1;
+                            saved = 1;
                             break;
                         } else {
-                            max = mid;
+                            t_p_2 = mid;
                         }
                     }
                 }
             }
             j += 1;
+            
+            // out cycle if found smth cause B[i] is const on this level
+            if (saved == 1) break;
         }
     }
     *res_size = ret_size;
