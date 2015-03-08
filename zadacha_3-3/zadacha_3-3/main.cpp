@@ -30,8 +30,8 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
     // binary search init
     int mid = 0;
     
-    // break-cycle flag
-    int saved = 0;
+    // break-cycle flags
+    int saved = 0; int max_steps = 0; int interval = log + 1; // max interval...
     
     // fix i = 0, cause 2^0 == 1..
     int i = 0; int j = 0;
@@ -44,14 +44,10 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
     for (; i < m; ++i) {
         saved = 0;
 
-        // seek among powers of 2
-        j = p; // last (max used) power of 2
-        while (j <= log) {
+        j = p; // last (max used) power of 2, seek among powers of 2
+        while (j < log) {
             t_p = int(pow(2, j)); // bufferize to count this power only once
-            
-            // ok, but I have to process end of array, with indexes < 2^max_power
-            // e.g. I have 10 items, but 2^max_power that covers all my items is 16 -- so I have to
-            // work with 2*t_p = n-1 when 2*t_p > n
+            //if (t_p >= n) t_p = n - 1; // if out of range
             
             if (A[t_p] < B[i]) {
                 if (2*t_p > n) t_p_2 = n - 1; // fuck yeah! last bug!
@@ -59,6 +55,8 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
                 
                 if (A[t_p_2] > B[i]) { // actually the last bug was here
                     // do binary-search here
+                    
+                    max_steps = 0;
                     while (true) {
                         mid = t_p + (t_p_2 - t_p)/2;
                         if (B[i] > A[mid]) {
@@ -72,6 +70,9 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
                         } else {
                             t_p_2 = mid;
                         }
+                        
+                        max_steps += 1;
+                        if (max_steps > interval) break; // nothing found
                     }
                 } else if (A[t_p_2] == B[i]) {
                     // gap for a last item in array (binary search fix)
@@ -88,7 +89,7 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
             }
             j += 1;
             
-            // out cycle if found smth cause B[i] is const on this level
+            // out cycle if found smth, cause B[i] is const on this level
             if (saved == 1) break;
         }
     }
