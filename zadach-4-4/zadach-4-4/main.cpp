@@ -8,6 +8,10 @@
 
 #include <iostream>
 
+// UNCOMMENT TO PASS EJUNDE! so headers, very ejudge...
+//#include <cstring> 
+//#include <malloc.h>
+
 
 // zadacha 4 1
 // ​Реализовать очередь с динамическим буфером.
@@ -16,73 +20,85 @@
 class Queue {
 public:
     Queue( int n ) {
-        data_size = n + 1; // not 0
+        data_size = n + 1; // definetly not 0
         data = new int[data_size];
         head = 0;
         tail = 0;
     };
-    
     ~Queue(){ delete[] data; };
+    void add_item(int item);
+    int del_item();
     
-    // dynamic buffer here
-    void add_item( int item ){
-        if ( (tail + 1) % data_size != head) {
-            data[tail] = item;
-            tail = (tail + 1) % data_size;
-        } else {
-            // out of buffer_size - re_init 'data', copy from head to tail, return new -> dynamic Q
-            int new_data_size = 2*data_size + 1;
-            int* buf_data = new int[new_data_size];
-            
-            // resave whole blocks
-            std::cout << "data_size: " << data_size << " head: " << head << "\n";
-            
-            memcpy(buf_data, data, (data_size-head)*sizeof(int));
-            if (data_size - tail > 0 && head > tail) {
-                std::cout << "tail\n";
-                memcpy(buf_data, data, (data_size-tail)*sizeof(int));
-            }
-
-            
-            // resave item-by-item
-//            int resave_buffer = 0;
-//            for (int i = 0; i < data_size; ++i){
-//                resave_buffer = del_item(); // best way to get data from head to tail
-//                if (resave_buffer != -1) {
-//                    buf_data[i] = resave_buffer;
-//                    //std::cout << buf_data[i] << " ";
-//                } else {
-//                    break;
-//                }
-//            }
-            
-            *data = *buf_data;
-            delete[] buf_data; // release dat buffer-memory
-            tail = data_size - 1; // new tail, surely last item now
-            data[tail] = item; // wrong tail ?
-            data_size = new_data_size;
-            head = 0;
-            
-            for (int i = 0; i < data_size; ++i) std::cout << data[i] << " ";
-            std::cout << "\n";
-        }
-    };
-    
-    int del_item(){
-        if ( head != tail ) {
-            int res = data[head];
-            head = (head + 1) % data_size;
-            return res;
-        }
-        return -1; // - means error
-    };
-    //bool is_empty() { return head == tail; };
 private:
     int data_size;
     int* data;
     int head; // first item in data
     int tail; // last item in data
 };
+
+
+int Queue::del_item() {
+    if ( head != tail ) {
+        int res = data[head];
+        head = (head + 1) % data_size;
+        return res;
+    }
+    return -1; // - means error
+}
+
+
+void Queue::add_item(int item) {
+    if ((tail + 1) % data_size != head) {
+        data[tail] = item;
+        tail = (tail + 1) % data_size;
+    } else {
+        // out of buffer_size - re_init 'data', copy from head to tail
+        int new_data_size = 2*data_size + 1;
+        int* buf_data = new int[new_data_size];
+        
+        memcpy(buf_data, data, (data_size-head)*sizeof(*data));
+        if (data_size - tail > 0 && head > tail) {
+            memcpy(buf_data, data, (data_size-tail)*sizeof(int));
+        }
+        buf_data[tail] = item; // add item...
+        
+        /*
+        std::cout << "bufer: \n";
+        for (int i = 0; i < new_data_size; ++i) std::cout << buf_data[i] << " ";
+        std::cout << "\n";
+         */
+        
+        realloc(data, new_data_size);
+        memcpy(data, buf_data, (data_size+1)*sizeof(*buf_data));
+        delete[] buf_data; // release dat buffer-memory
+        
+        head = 0;
+        tail = data_size; // new tail, surely last item now
+        data_size = new_data_size;
+    }
+}
+
+
+/*
+// tests of memcpy
+int main1(){
+    size_t size0; size_t size1;
+    std::cin >> size0 >> size1;
+    
+    int* data = new int[size0]; int* buf_data = new int[size1];
+    for (int i = 0; i < size0; ++i) std::cin >> data[i];
+    
+    if (size0 >= size1) memcpy(buf_data, data, size1*sizeof(*data));
+    else memcpy(buf_data, data, size0*sizeof(*data));
+    
+    std::cout << "result: ";
+    for (int i = 0; i < size1; ++i) std::cout << buf_data[i] << " ";
+    std::cout << "\n";
+    
+    delete [] data; delete [] buf_data;
+    return 0;
+}
+*/
 
 
 int main(int argc, const char * argv[]) {
@@ -95,7 +111,6 @@ int main(int argc, const char * argv[]) {
         // codes can be '2' or '3' only
         if (code == 2) {
             buf = q1 -> del_item();
-            std::cout << buf << " released\n";
             if (buf != arg) {
                 error = 1; // - test isnt passed !
             }
