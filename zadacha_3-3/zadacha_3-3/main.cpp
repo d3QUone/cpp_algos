@@ -19,7 +19,7 @@
 
 // finds B in A
 void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
-    int log = int(std::log2(n)) + 1;
+    int log = int(std::log2(n)) + 1; //// - EJEDGE THROWS AN EXCEPTION HERE (NO LOG2 IN IT, LOL)
     //std::cout << "log = " << log << ", 2^log = " << pow(2, log) << "\n";
     
     int p = 0; // last used power of 2
@@ -41,38 +41,30 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
         i = 1;
     }
     
-    //int t1 = 0;
     for (; i < m; ++i) {
-        //t1 = B[i];  // just for debug
         saved = 0;
 
         // seek among powers of 2
         j = p; // last (max used) power of 2
         while (j <= log) {
             t_p = int(pow(2, j)); // bufferize to count this power only once
-            // 2*t_p may be out of range when j = log - 1
-            // 2*t_p == 2^j == 2^log / 2 ==
             
             // ok, but I have to process end of array, with indexes < 2^max_power
             // e.g. I have 10 items, but 2^max_power that covers all my items is 16 -- so I have to
-            // work with 2*t_p = n when 2*t_p > n
+            // work with 2*t_p = n-1 when 2*t_p > n
             
             if (A[t_p] <= B[i]) {
-                if (2*t_p > n) t_p_2 = n;
+                if (2*t_p > n) t_p_2 = n - 1; // fuck yeah! last bug!
                 else t_p_2 = 2*t_p;
                 
                 if (A[t_p_2] > B[i]) {
                     // do binary-search here
-                    
-                    // min = t_p;   // save some bytes :)
-                    // max = t_p_2;
-                    
                     while (true) {
                         mid = t_p + (t_p_2 - t_p)/2;
                         if (B[i] > A[mid]) {
                             t_p = mid;
                         } else if (B[i] == A[mid]) {
-                            p = j; // j + 1 ??? or dangerous?
+                            p = j;
                             res[ret_size] = A[mid];
                             ret_size += 1;
                             saved = 1;
@@ -94,9 +86,6 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
 
 
 int main(int argc, const char * argv[]) {
-    //for (int i = 1; i < 100; ++i) std::cout << "log2 " << i << " = " << std::log2(i) << "\n";
-    //return 0;
-    
     // fill in array sizes
     int n = 0; int m = 0;
     std::cin >> n >> m;
