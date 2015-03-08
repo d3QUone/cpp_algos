@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include <cmath>
+#include <math.h>
 
 /*
  3_3.
@@ -19,7 +19,7 @@
 
 // finds B in A
 void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
-    int log = int(std::log2(n)) + 1; //// - EJEDGE THROWS AN EXCEPTION HERE (NO LOG2 IN IT, LOL)
+    int log = int(log2(n)) + 1;
     //std::cout << "log = " << log << ", 2^log = " << pow(2, log) << "\n";
     
     int p = 0; // last used power of 2
@@ -28,9 +28,9 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
     int ret_size = 0; // stores return-arr-size (== last index)
     
     // binary search init
-    // int min = 0; int max = 0;
     int mid = 0;
     
+    // break-cycle flag
     int saved = 0;
     
     // fix i = 0, cause 2^0 == 1..
@@ -53,11 +53,11 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
             // e.g. I have 10 items, but 2^max_power that covers all my items is 16 -- so I have to
             // work with 2*t_p = n-1 when 2*t_p > n
             
-            if (A[t_p] <= B[i]) {
+            if (A[t_p] < B[i]) {
                 if (2*t_p > n) t_p_2 = n - 1; // fuck yeah! last bug!
                 else t_p_2 = 2*t_p;
                 
-                if (A[t_p_2] > B[i]) {
+                if (A[t_p_2] > B[i]) { // actually the last bug was here
                     // do binary-search here
                     while (true) {
                         mid = t_p + (t_p_2 - t_p)/2;
@@ -73,7 +73,18 @@ void repeat_arrs(int n, int m, int* A, int* B, int* res_size, int* res) {
                             t_p_2 = mid;
                         }
                     }
+                } else if (A[t_p_2] == B[i]) {
+                    // gap for a last item in array (binary search fix)
+                    p = j;
+                    res[ret_size] = A[t_p_2];
+                    ret_size += 1;
+                    saved = 1;
                 }
+            } else if (A[t_p] == B[i]) {
+                p = j;
+                res[ret_size] = A[t_p];
+                ret_size += 1;
+                saved = 1;
             }
             j += 1;
             
