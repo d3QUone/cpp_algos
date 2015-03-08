@@ -58,15 +58,23 @@ void mail_filter(char** inp, size_t lines, char** out){
     free(line);
 }
 
+//Стандартная функция calloc(n, size) возвращает указатель на n элементов памяти
+//размера size, заполненных нулями.
 
 int main(){
-    // init an array of nulls
-    char** big_array = calloc(MAX_SIZE, sizeof(char* ));
-    for (int i = 0; i < MAX_SIZE; ++i) big_array[i] = calloc(MAX_SIZE, sizeof(char));
+    // init an array of nulls, n=MAX_SIZE items
+    char** big_array = (char** ) calloc(MAX_SIZE, sizeof(char** ));
+    if (big_array == NULL) {
+        printf("[error]");
+        free(big_array);
+        exit(1); // vg-exitcode
+    }
+    // 1 line, MAX_SIZE-lenght
+    else for (int i = 0; i < MAX_SIZE; ++i) big_array[i] = calloc(1, MAX_SIZE*sizeof(char));
     
     // fill array while any data
     size_t size = 0;
-    char* buff = (char* ) malloc(MAX_SIZE*sizeof(char));
+    char* buff = (char* ) malloc(MAX_SIZE*sizeof(char* ));
     while (fgets(buff, MAX_SIZE, stdin) != 0) {
         strcpy(big_array[size], buff);
         size += 1;
@@ -79,7 +87,7 @@ int main(){
             free(big_array[i]);
         }
         free(big_array);
-        exit(1); // 0 ? 1
+        exit(1); // vg-exitcode
     }
     
     /*
@@ -93,20 +101,18 @@ int main(){
     // init an array of nulls to store result there
     char** result = calloc(size, sizeof(char* ));
     for (int i = 0; i < size; ++i) {
-        result[i] = calloc(MAX_SIZE, sizeof(char));
+        result[i] = calloc(1, MAX_SIZE*sizeof(char));
     }
     mail_filter(big_array, size, result);
 
     for (size_t i = 0; i < size; ++i) {
         printf("%s", result[i]);
-        free(result[i]);
+        free(result[i]); //// -- leak
     }
-    free(result);
+    free(result); //// -- leak
     
-    for (int i = 0; i < MAX_SIZE; ++i) {
-        free(big_array[i]);
-    }
-    free(big_array);
+    for (int i = 0; i < MAX_SIZE; ++i) free(big_array[i]); // smth wrong here! // invalid free()
+    free(big_array); //// -- leak
 
     return 0;
 }
