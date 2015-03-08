@@ -67,6 +67,7 @@ int main(){
     if (big_array == NULL) {
         printf("[error]");
         free(big_array);
+        big_array = NULL;
         exit(1); // vg-exitcode
     }
     // 1 line, MAX_SIZE-lenght
@@ -87,6 +88,7 @@ int main(){
             free(big_array[i]);
         }
         free(big_array);
+        big_array = NULL;
         exit(1); // vg-exitcode
     }
     
@@ -110,9 +112,11 @@ int main(){
         free(result[i]); //// -- leak
     }
     free(result); //// -- leak
+    result = NULL;
     
     for (int i = 0; i < MAX_SIZE; ++i) free(big_array[i]); // smth wrong here! // invalid free()
     free(big_array); //// -- leak
+    big_array = NULL;
 
     return 0;
 }

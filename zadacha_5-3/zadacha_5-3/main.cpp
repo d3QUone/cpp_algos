@@ -93,7 +93,6 @@ int CStack::pop(){
 
 // tests //
 
-
 void write_command(std::vector<int> stack, bool need_push, int data){
     if (need_push) {
         std::cout << "1 " << data << "\n";
@@ -105,7 +104,6 @@ void write_command(std::vector<int> stack, bool need_push, int data){
     }
 }
 
-
 void generate_test(){
     std::vector<int> stack;
     std::cout << 2000 << "\n";
@@ -115,7 +113,7 @@ void generate_test(){
     }
 }
 
-
+// tests aren't unfinished yet
 FILE *f;
 int main_test(){
     //freopen_s();
@@ -141,57 +139,30 @@ int main_test(){
                 return 0;
             }
         }
-        
     }
     return 0;
 }
 
 
-//
-// -- my task --
-//
-// stack of INTs
-//
-
-class Stack {
-public:
-    Stack( int init_size ){
-        top = 0;
-        buffer_size = 0;
-        max_size = init_size;
-        buffer = new int[max_size];
-    };
-    
-    ~Stack(){
-        delete[] buffer;
-    };
+/*
  
-    int pull(){
-        // pulls last var of stack
-        return 0;
-    };
+ 5_3. Прямоугольники.
  
-    void push( int x ) {
-        // adds to the end
-    };
+ Дана последовательность ​N​ прямоугольников различной ширины и высоты (w​i,​h​i)​.
+ Прямоугольники расположены, начиная с точки (0, 0), на оси ОХ вплотную друг за другом (вправо). 
+ Требуется найти ​M​­ площадь максимального прямоугольника (параллельного осям координат), 
+ который можно вырезать из этой фигуры.
  
-    bool is_empty() { return buffer_size == 0; };
- 
-private:
-    int buffer_size;
-    int* buffer; // all data here
-    int top; // index of last item
-    int max_size;
-};
+*/
 
 
-// solves the problem
 int max_sq(int n, int* blocks) {
-    Stack* s = new Stack(n);
+    CStack* s;
+    
+    
     
     
     delete s;
-    
     return 0; // - ans
 }
 
@@ -201,15 +172,10 @@ int main(int argc, const char * argv[]) {
     int n = 0;
     std::cin >> n;
     
+    // [0, 1], [2, 3], [4, 5], ..., [2*i, 2i+1], ...
     int* bl = new int[2*n];
-    for( int i = 0; i < n; ++i) {
-        std::cin >> bl[2*i] >> bl[2*i+1];
-        
-        // [1, 2], [3, 4], [5, 6], ..., [2*i, 2i+1], ...
-        // i = 0: 0, 1
-        // i = 1; 2, 3
-        // i = 2; 4, 5
-    }
+    for( int i = 0; i < n; ++i) std::cin >> bl[2*i] >> bl[2*i+1];
+    
     std::cout << max_sq(n, bl);
     return 0;
 }
