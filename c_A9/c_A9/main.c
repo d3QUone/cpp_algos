@@ -25,18 +25,24 @@
 const char* keys[] = {"Date:", "From:", "To:", "Subject:"};
 
 
-void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
-    char* line = (char* ) malloc(MAX_SIZE*sizeof(char));
-    size_t j = 0;
+void mail_filter(char* inp, size_t characters, char* out, size_t* out_size){
+    
     size_t key_size = 0;
     size_t parsed_ok = 0; // 1 - match, 0 - no matches
     size_t current_out_index = 0;
     
-    for (size_t i = 0; i < lines; ++i){
-        line = inp[i];
+    
+    size_t i = 0; // global search
+    size_t j = 0; // in-key search
+    char current; // saves current char
+
+    
+    while (i < characters){
+        current = inp[i];
         parsed_ok = 1;
+        
         for (size_t t = 0; t < AMOUNT_OF_KEYS; ++t) {
-            if (line[0] == keys[t][0]) {
+            if (current == keys[t][0]) {
                 j = 1; // cause 0 is alredy passed
                 key_size = strlen(keys[t]);  //printf("\nkey_size: %zu\n", key_size);
                 
@@ -54,29 +60,90 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
                 }
             }
         }
+        i ++ ;
     }
     *out_size = current_out_index;
-    free(line);
-    line = NULL;
 }
 
-//Стандартная функция calloc(n, size) возвращает указатель на n элементов памяти
-//размера size, заполненных нулями.
 
+int main() {
+    char* array = (char*)malloc(MAX_SIZE);
+    if (array == NULL) {
+        printf("[error]");
+        exit(1);
+    } else {
+        size_t filled = 0; // number of chars in array
+        
+        // read from stdin
+        while (scanf("%c", &array[filled]) != -1) {
+            if (array[filled] != ' ') {
+                filled++;
+            }
+            if (filled % MAX_SIZE == 0) {
+                // array is filled, create new..
+                char* buffer = (char*)malloc(2*filled);
+                
+                if (buffer != NULL) {
+                    memcpy(buffer, array, filled);
+                    
+                    if ((char *)realloc(array, 2*filled) != NULL) { // be careful here
+                        memcpy(array, buffer, filled);
+                        free(buffer);
+                    } else {
+                        free(array); // no memory
+                        free(buffer);
+                        printf("[error]");
+                        exit(1);
+                    }
+                } else {
+                    free(array); // no memory
+                    printf("[error]");
+                    exit(1);
+                }
+            }
+        }
+        
+        // check input:
+//        printf("\n\n--checkup--\n\n");
+//        for (size_t i = 0; i < filled; ++i) {
+//            printf("%c", array[i]);
+//        }
+        
+        // parse data ...
+        char* result = (char*)malloc(filled); // calloc(size, sizeof(char* ));
+        if (result == NULL) {
+            printf("[error]");
+            free(array);
+            exit(1);
+        } else {
+            size_t out_size = 0;
+            mail_filter(array, filled, result, &out_size);
+            
+            for (size_t i = 0; i < out_size; ++i) {
+                printf("%c", result[i]);
+            }
+            free(result);
+            free(array);
+        }
+    }
+    return 0;
+}
+
+/*
 int main(){
-    char** big_array = (char** ) malloc(MAX_SIZE*sizeof(char* ));
+    char* big_array = (char*)malloc(MAX_SIZE*sizeof(char* ));
     if (big_array == NULL) {
         printf("[error]");
         exit(1);
     } else {
         for (size_t i = 0; i < MAX_SIZE; ++i) {
-            big_array[i] = (char* ) malloc(MAX_SIZE*sizeof(char)); // calloc(1, sizeof(char* ));
+            //big_array[i] = (char*) malloc(MAX_SIZE); // calloc(1, sizeof(char* ));
         }
     }
     
     // fill array while any data
     size_t size = 0;
-    char* buff = (char* ) malloc(MAX_SIZE*sizeof(char));
+    char* buff = (char*)malloc(MAX_SIZE);
     while (fgets(buff, MAX_SIZE, stdin) != 0) {
         strcpy(big_array[size], buff);
         size += 1;
@@ -91,20 +158,20 @@ int main(){
         free(big_array); big_array = NULL;
         exit(1);
     }
-    /*
+ 
     // debug...
-    printf("\n------ check inp ------\ngot %zu lines\n\n", size);
-    for (size_t i = 0; i < size; ++i) {
-        printf("%s", big_array[i]);
-    }*/
-    
+//    printf("\n------ check inp ------\ngot %zu lines\n\n", size);
+//    for (size_t i = 0; i < size; ++i) {
+//        printf("%s", big_array[i]);
+//    }
+ 
     char** result = (char** ) malloc(size*sizeof(char* )); // calloc(size, sizeof(char* ));
     if (result == NULL) {
         printf("[error]");
         exit(1);
     } else {
         for (size_t i = 0; i < size; ++i) {
-            result[i] = (char* ) malloc(MAX_SIZE*sizeof(char)); //calloc(1, sizeof(char* ));
+            result[i] = (char* ) malloc(MAX_SIZE); //calloc(1, sizeof(char* ));
         }
     }
     
@@ -125,4 +192,5 @@ int main(){
     }
     free(big_array); big_array = NULL;
     return 0;
-}
+}*/
+
