@@ -41,6 +41,7 @@ void mail_filter(char* inp, size_t characters, char* out, size_t* out_size){
         current = inp[i];
         parsed_ok = 1;
         
+        // ---- unfinished ----
         for (size_t t = 0; t < AMOUNT_OF_KEYS; ++t) {
             if (current == keys[t][0]) {
                 j = 1; // cause 0 is alredy passed
@@ -85,8 +86,8 @@ int main() {
                 
                 if (buffer != NULL) {
                     memcpy(buffer, array, filled);
-                    
-                    if ((char *)realloc(array, 2*filled) != NULL) { // be careful here
+                    array = (char *)realloc(array, 2*filled);
+                    if (array != NULL) { // be careful here
                         memcpy(array, buffer, filled);
                         free(buffer);
                     } else {
@@ -109,7 +110,8 @@ int main() {
 //            printf("%c", array[i]);
 //        }
         
-        // parse data ...
+        // parse data ... unfinished
+        /*
         char* result = (char*)malloc(filled); // calloc(size, sizeof(char* ));
         if (result == NULL) {
             printf("[error]");
@@ -125,6 +127,7 @@ int main() {
             free(result);
             free(array);
         }
+         */
     }
     return 0;
 }
