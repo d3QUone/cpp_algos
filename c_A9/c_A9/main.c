@@ -111,9 +111,11 @@ int main(){
     mail_filter(big_array, size, result, &out_size);
     for (size_t i = 0; i < out_size; ++i) {
         printf("%s", result[i]);
-        free(result[i]); // release memory after each printing
     }
-    //for (size_t i = 0; i < out_size; ++i) free(result[i]);
+    
+    for (size_t i = 0; i < size; ++i) {
+        free(result[i]);
+    }
     free(result);
     
     for (size_t i = 0; i < MAX_SIZE; ++i) {
