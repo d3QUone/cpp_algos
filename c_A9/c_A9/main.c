@@ -34,25 +34,24 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
     
     for (size_t i = 0; i < lines; ++i){
         strcpy(line, inp[i]); // perfect
-        //memcpy(line, inp[i], MAX_SIZE);
-        
         parsed_ok = 1;
         for (size_t t = 0; t < AMOUNT_OF_KEYS; ++t) {
             if (line[0] == keys[t][0]) {
                 j = 1; // cause j = 0 already passed
-                key_size = strlen(keys[t]);
                 
                 // process data while not end-of-line OR while key is true
+                key_size = strlen(keys[t]);
                 while (line[j] != '\n' && j < key_size) {
                     if (line[j] != keys[t][j]) {
                         parsed_ok = 0;
-                        break; // error
+                        break; // it is not a key
                     }
                     j += 1;
                 }
                 if (parsed_ok == 1) {
                     strcpy(out[current_out_index], line); // perfect
                     current_out_index += 1;
+                    break; // one key was found, no more in current char
                 }
             }
         }
