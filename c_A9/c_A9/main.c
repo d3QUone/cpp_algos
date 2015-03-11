@@ -22,10 +22,10 @@
 
 #define MAX_SIZE 1024 // 1024 chars in string, 1024 strings
 #define AMOUNT_OF_KEYS 4
-const char* keys[] = {"Date:", "From:", "To:", "Subject:"}; //printf("%s\n", keys[3]);
+const char* keys[] = {"Date:", "From:", "To:", "Subject:"};
 
 
-void mail_filter(char** inp, size_t lines, char** out){
+void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
     char* line = (char* ) malloc(MAX_SIZE*sizeof(char));
     size_t j = 0;
     size_t key_size = 0;
@@ -55,43 +55,42 @@ void mail_filter(char** inp, size_t lines, char** out){
             }
         }
     }
+    *out_size = current_out_index;
     free(line);
+    line = NULL;
 }
 
 //Стандартная функция calloc(n, size) возвращает указатель на n элементов памяти
 //размера size, заполненных нулями.
 
 int main(){
-    // init an array of nulls, n=MAX_SIZE items
-    char** big_array = (char** ) calloc(MAX_SIZE, sizeof(char** ));
+    char** big_array = (char** ) malloc(MAX_SIZE*sizeof(char* ));
     if (big_array == NULL) {
         printf("[error]");
-        free(big_array);
-        big_array = NULL;
-        exit(1); // vg-exitcode
+        exit(1);
+    } else {
+        for (size_t i = 0; i < MAX_SIZE; ++i) {
+            big_array[i] = (char* ) malloc(MAX_SIZE*sizeof(char)); // calloc(1, sizeof(char* ));
+        }
     }
-    // 1 line, MAX_SIZE-lenght
-    else for (int i = 0; i < MAX_SIZE; ++i) big_array[i] = calloc(1, MAX_SIZE*sizeof(char));
     
     // fill array while any data
     size_t size = 0;
-    char* buff = (char* ) malloc(MAX_SIZE*sizeof(char* ));
+    char* buff = (char* ) malloc(MAX_SIZE*sizeof(char));
     while (fgets(buff, MAX_SIZE, stdin) != 0) {
         strcpy(big_array[size], buff);
         size += 1;
     }
-    free(buff);
+    free(buff); buff = NULL;
     
     if (size == 0) {
         printf("[error]");
         for (int i = 0; i < MAX_SIZE; ++i) {
             free(big_array[i]);
         }
-        free(big_array);
-        big_array = NULL;
-        exit(1); // vg-exitcode
+        free(big_array); big_array = NULL;
+        exit(1);
     }
-    
     /*
     // debug...
     printf("\n------ check inp ------\ngot %zu lines\n\n", size);
@@ -99,24 +98,31 @@ int main(){
         printf("%s", big_array[i]);
     }*/
     
-    
-    // init an array of nulls to store result there
-    char** result = calloc(size, sizeof(char* ));
-    for (int i = 0; i < size; ++i) {
-        result[i] = calloc(1, MAX_SIZE*sizeof(char));
+    char** result = (char** ) malloc(size*sizeof(char* )); // calloc(size, sizeof(char* ));
+    if (result == NULL) {
+        printf("[error]");
+        exit(1);
+    } else {
+        for (size_t i = 0; i < size; ++i) {
+            result[i] = (char* ) malloc(MAX_SIZE*sizeof(char)); //calloc(1, sizeof(char* ));
+        }
     }
-    mail_filter(big_array, size, result);
-
-    for (size_t i = 0; i < size; ++i) {
+    
+    size_t out_size = 0;
+    mail_filter(big_array, size, result, &out_size);
+    for (size_t i = 0; i < out_size; ++i) {
         printf("%s", result[i]);
-        free(result[i]); //// -- leak
+        //free(result[i]); //// -- leak
     }
-    free(result); //// -- leak
-    result = NULL;
     
-    for (int i = 0; i < MAX_SIZE; ++i) free(big_array[i]); // smth wrong here! // invalid free()
-    free(big_array); //// -- leak
-    big_array = NULL;
-
+    for (size_t i = 0; i < out_size; ++i) {
+        free(result[i]); //// -- leak at '\0'
+    }
+    free(result); result = NULL;
+    
+    for (size_t i = 0; i < MAX_SIZE; ++i) {
+        free(big_array[i]); // smth wrong here! // invalid free() '\0'
+    }
+    free(big_array); big_array = NULL;
     return 0;
 }
