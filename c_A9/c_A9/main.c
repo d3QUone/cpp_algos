@@ -26,19 +26,21 @@ const char* keys[] = {"Date:", "From:", "To:", "Subject:"};
 
 
 void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
-    char* line = (char* ) malloc(MAX_SIZE*sizeof(char));
+    char* line = (char* )malloc(MAX_SIZE*sizeof(char));
     size_t j = 0;
     size_t key_size = 0;
     size_t parsed_ok = 0; // 1 - match, 0 - no matches
     size_t current_out_index = 0;
     
     for (size_t i = 0; i < lines; ++i){
-        line = inp[i];
+        strcpy(line, inp[i]); // perfect
+        //memcpy(line, inp[i], MAX_SIZE);
+        
         parsed_ok = 1;
         for (size_t t = 0; t < AMOUNT_OF_KEYS; ++t) {
             if (line[0] == keys[t][0]) {
-                j = 1; // cause 0 is alredy passed
-                key_size = strlen(keys[t]);  //printf("\nkey_size: %zu\n", key_size);
+                j = 1; // cause j = 0 already passed
+                key_size = strlen(keys[t]);
                 
                 // process data while not end-of-line OR while key is true
                 while (line[j] != '\n' && j < key_size) {
@@ -49,7 +51,7 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
                     j += 1;
                 }
                 if (parsed_ok == 1) {
-                    out[current_out_index] = line;
+                    strcpy(out[current_out_index], line); // perfect
                     current_out_index += 1;
                 }
             }
@@ -57,38 +59,35 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
     }
     *out_size = current_out_index;
     free(line);
-    line = NULL;
 }
 
-//Стандартная функция calloc(n, size) возвращает указатель на n элементов памяти
-//размера size, заполненных нулями.
 
 int main(){
-    char** big_array = (char** ) malloc(MAX_SIZE*sizeof(char* ));
+    char** big_array = (char** )malloc(MAX_SIZE*sizeof(char* ));
     if (big_array == NULL) {
         printf("[error]");
         exit(1);
     } else {
         for (size_t i = 0; i < MAX_SIZE; ++i) {
-            big_array[i] = (char* ) malloc(MAX_SIZE*sizeof(char)); // calloc(1, sizeof(char* ));
+            big_array[i] = (char* )malloc(MAX_SIZE*sizeof(char));
         }
     }
     
     // fill array while any data
     size_t size = 0;
-    char* buff = (char* ) malloc(MAX_SIZE*sizeof(char));
+    char* buff = (char* )malloc(MAX_SIZE*sizeof(char));
     while (fgets(buff, MAX_SIZE, stdin) != 0) {
         strcpy(big_array[size], buff);
         size += 1;
     }
-    free(buff); buff = NULL;
+    free(buff);
     
     if (size == 0) {
         printf("[error]");
         for (int i = 0; i < MAX_SIZE; ++i) {
             free(big_array[i]);
         }
-        free(big_array); big_array = NULL;
+        free(big_array);
         exit(1);
     }
     /*
@@ -98,13 +97,13 @@ int main(){
         printf("%s", big_array[i]);
     }*/
     
-    char** result = (char** ) malloc(size*sizeof(char* )); // calloc(size, sizeof(char* ));
+    char** result = (char** )malloc(size*sizeof(char* ));
     if (result == NULL) {
         printf("[error]");
         exit(1);
     } else {
         for (size_t i = 0; i < size; ++i) {
-            result[i] = (char* ) malloc(MAX_SIZE*sizeof(char)); //calloc(1, sizeof(char* ));
+            result[i] = (char* )malloc(MAX_SIZE*sizeof(char));
         }
     }
     
@@ -112,17 +111,14 @@ int main(){
     mail_filter(big_array, size, result, &out_size);
     for (size_t i = 0; i < out_size; ++i) {
         printf("%s", result[i]);
-        //free(result[i]); //// -- leak
+        free(result[i]); // release memory after each printing
     }
-    
-    for (size_t i = 0; i < out_size; ++i) {
-        free(result[i]); //// -- leak at '\0'
-    }
-    free(result); result = NULL;
+    //for (size_t i = 0; i < out_size; ++i) free(result[i]);
+    free(result);
     
     for (size_t i = 0; i < MAX_SIZE; ++i) {
-        free(big_array[i]); // smth wrong here! // invalid free() '\0'
+        free(big_array[i]);
     }
-    free(big_array); big_array = NULL;
+    free(big_array);
     return 0;
 }
