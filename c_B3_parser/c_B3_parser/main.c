@@ -41,11 +41,10 @@ size_t is_operator(char to_check) {
 // evaulates array in Postfix
 double evaulate_rpn(char** exp, size_t len) {
     double* stack = (double* ) malloc(len*sizeof(double)); // stack for operands
-    size_t place = 0;
+    size_t place = 0; // current stack size
     
-    // used to process sub eval
     double a1 = 0.0;
-    double a2 = 0.0;
+    double a2 = 0.0; // buffers to save stack items
     
     for (size_t i = 0; i < len; ++i) {
         printf("%s\n", exp[i]);
@@ -81,40 +80,73 @@ double evaulate_rpn(char** exp, size_t len) {
 }
 
 
+// add struct / method to comfort appending item to string?
+
 
 // transform from Infix to Postfix notation
 double create_rpn(char* exp, size_t len){
-    char buffer; // one current char
-    //char* doubles = (char* ) malloc(len*sizeof(char)); // to convert string to double
-    
     char** stack = (char** ) malloc(len*sizeof(char* )); // stack for numbers, operators
+    size_t top = 0;  // position of last item in stack
+    
+    //char* result_str = (char* ) malloc(len*sizeof(char));
+    
+    char buffer; // one current char
+    
+    char* double_buffer = (char* ) malloc(1); // buffer for numbers
+    size_t buffer_size = 0; // its size
+    
+    size_t flag = 0; // used to separate digits
+    
+    size_t bracket_balance = 0;
     
     size_t index = 0;
-    size_t top = 0;  // position of last item in stack
-    //size_t flag = 0; // used to separate digits
-    
     while (index < len) {
         buffer = exp[index]; //printf("%c\n", buffer);
-        
-        if (buffer == '(' || buffer == ')' ) {
-            // pull out of stack?
+        if (buffer == '(') {
+            // - OK
+            bracket_balance -= 1;
             
+            stack[top] = (char* ) malloc(1); // one char only
+            strcpy(stack[top], &buffer);
+            top += 1;
+            
+            //printf("check: %s\n", stack[top]);
+
+        } else if (buffer == ')'){
+            bracket_balance += 1;
+            
+            
+        } else if ( is_operator(buffer) == 1 ) {
+            // operator...
+            
+            
+            
+                
+                
         } else {
             
-            /*if ( is_operator(buffer) == 1 ) {
-                // operator...
-                
-            } else {
-             
-             // operand!
-             
-             // parse doubles
-             
-            }*/
+            // append char to buffer string
+            
+            // --- stopped here ---
+            
+            if (flag == 0)
+                flag = 1;
+            
         }
+        
+        if (flag == 1) {
+            // move buffer to double, save to stack
+        }
+        
         index++ ;
     }
-    return evaulate_rpn(stack, top);
+    
+    if (bracket_balance == 0)
+        return evaulate_rpn(stack, top);
+    else {
+        printf("[error]"); // wrong brackets
+        exit(1);
+    }
 }
 
 
@@ -131,15 +163,15 @@ int main(int argc, const char * argv[]) {
                 len ++;
                 // save everything except spaces
             }
-            
             // can add resizing later here!
         }
-        //double result = create_rpn(expression, len);
+        double result = create_rpn(expression, len);
         
         //char* test[] = {"1", "2", "+", "3", "4", "-", "+"}; // 2.00
         //char* test[] = {"10.3", "2", "+", "3", "4", "+", "+"}; // 19.30
-        char* test[] = {"11", "3", "9", "*", "+"}; // 38.00
-        double result = evaulate_rpn(test, sizeof(test)/sizeof(char* ));
+        //char* test[] = {"11", "3", "9", "*", "+"}; // 38.00
+        //double result = evaulate_rpn(test, sizeof(test)/sizeof(char* ));
+        
         printf("%.2f", result);
         free(expression);
     }
