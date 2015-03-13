@@ -38,6 +38,21 @@ size_t is_operator(char to_check) {
 }
 
 
+// needs to check priority
+size_t operator_power(char op) {
+    if (op == '+')
+        return 1;
+    else if (op == '-')
+        return 2;
+    else if (op == '*')
+        return 3;
+    else if (op == '/')
+        return 4;
+    else
+        return -1;
+}
+
+
 // evaulates array in Postfix
 double evaulate_rpn(char** exp, size_t len) {
     double* stack = (double* ) malloc(len*sizeof(double)); // stack for operands

@@ -49,6 +49,7 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
                     j += 1;
                 }
                 if (parsed_ok == 1) {
+                    out[current_out_index] = (char* )malloc(MAX_SIZE*sizeof(char)); // allocate on-the-go
                     strcpy(out[current_out_index], line); // perfect
                     current_out_index += 1;
                     break; // one key was found, no more in current char
@@ -66,27 +67,21 @@ int main(){
     if (big_array == NULL) {
         printf("[error]");
         exit(1);
-    } else {
-        for (size_t i = 0; i < MAX_SIZE; ++i) {
-            big_array[i] = (char* )malloc(MAX_SIZE*sizeof(char));
-        }
     }
     
     // fill array while any data
     size_t size = 0;
     char* buff = (char* )malloc(MAX_SIZE*sizeof(char));
-    while (fgets(buff, MAX_SIZE, stdin) != 0) {
+    while (fgets(buff, MAX_SIZE, stdin) != NULL) {
+        big_array[size] = (char* )malloc(MAX_SIZE*sizeof(char)); // allocate on-the-go
         strcpy(big_array[size], buff);
         size += 1;
     }
     free(buff);
     
     if (size == 0) {
-        printf("[error]");
-        for (int i = 0; i < MAX_SIZE; ++i) {
-            free(big_array[i]);
-        }
         free(big_array);
+        printf("[error]");
         exit(1);
     }
     /*
@@ -100,26 +95,24 @@ int main(){
     if (result == NULL) {
         printf("[error]");
         exit(1);
-    } else {
-        for (size_t i = 0; i < size; ++i) {
-            result[i] = (char* )malloc(MAX_SIZE*sizeof(char));
-        }
     }
     
+    // process
     size_t out_size = 0;
     mail_filter(big_array, size, result, &out_size);
     for (size_t i = 0; i < out_size; ++i) {
         printf("%s", result[i]);
     }
     
+    // free
     for (size_t i = 0; i < size; ++i) {
-        free(result[i]);
-    }
-    free(result);
-    
-    for (size_t i = 0; i < MAX_SIZE; ++i) {
         free(big_array[i]);
+        
+        if (i < out_size) {
+            free(result[i]);
+        }
     }
     free(big_array);
+    free(result);
     return 0;
 }
