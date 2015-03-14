@@ -26,20 +26,8 @@
 #define MAX_LEN 1024
 
 
-// check if current char is operator
-size_t is_operator(char to_check) {
-    if (to_check == '+' ||
-        to_check == '-' ||
-        to_check == '*' ||
-        to_check == '/')
-        return 1;
-    else
-        return 0;
-}
-
-
 // needs to check priority
-size_t operator_power(char op) {
+size_t get_power(char op) {
     if (op == '+')
         return 1;
     else if (op == '-')
@@ -48,13 +36,46 @@ size_t operator_power(char op) {
         return 3;
     else if (op == '/')
         return 4;
+    else if (op == 'm') // let binary minus has max priority
+        return 5;
     else
         return -1;
 }
 
 
+// check if current char is operator
+size_t operator_allowed(char op) {
+    /*
+    if (strcmp(op, "+") == 0 || strcmp(op, "-") == 0 || strcmp(op, "*") == 0 ||
+        strcmp(op, "/") == 0 ||
+        strcmp(op, "m") == 0)
+        return 1;
+     */
+    
+    if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm')
+        return 1;
+    else
+        return 0;
+}
+
+
+size_t operand_allowed(char op) {
+    if (op == '1' || op == '2' || op == '3' ||
+        op == '4' || op == '5' || op == '6' ||
+        op == '7' || op == '8' || op == '9' ||
+        op == '0' || op == '.')
+        return 1;
+    else
+        return 0;
+}
+
+
+/*
 // evaulates array in Postfix
 double evaulate_rpn(char** exp, size_t len) {
+
+    // update to parse chars by ' ' (spaces), not array
+    
     double* stack = (double* ) malloc(len*sizeof(double)); // stack for operands
     size_t place = 0; // current stack size
     
@@ -93,73 +114,74 @@ double evaulate_rpn(char** exp, size_t len) {
     }
     return stack[0]; // result here
 }
-
-
-// add struct / method to comfort appending item to string?
+ */
 
 
 // transform from Infix to Postfix notation
 double create_rpn(char* exp, size_t len){
-    char** stack = (char** ) malloc(len*sizeof(char* )); // stack for numbers, operators
-    size_t top = 0;  // position of last item in stack
+    // stack for ()+-*/
+    char* stack = (char* ) malloc(len*sizeof(char));
+    size_t stack_top = 0;  // position of last item in stack
     
-    //char* result_str = (char* ) malloc(len*sizeof(char));
+    // string for saving postfix notation
+    char* result_str = (char* ) malloc(len*sizeof(char));
+    size_t result_size = 0;
     
     char buffer; // one current char
-    
-    char* double_buffer = (char* ) malloc(1); // buffer for numbers
-    size_t buffer_size = 0; // its size
-    
-    size_t flag = 0; // used to separate digits
-    
-    size_t bracket_balance = 0;
-    
+    int bracket_deep = 0; // ? may be no need // check inside Stack repush
     size_t index = 0;
     while (index < len) {
-        buffer = exp[index]; //printf("%c\n", buffer);
-        if (buffer == '(') {
-            // - OK
-            bracket_balance -= 1;
+        buffer = exp[index]; printf("'%c', size = %zu\n", buffer, sizeof(buffer));
+        
+        if (operand_allowed(buffer) == 1) {
+            result_str += buffer;
             
-            stack[top] = (char* ) malloc(1); // one char only
-            strcpy(stack[top], &buffer);
-            top += 1;
+        } else if (operand_allowed(buffer) == 1) {
+            stack += buffer;
             
+            // pop -> push to res
+            
+        } else if (buffer == '(') {
+            bracket_deep += 1;
+            
+            stack += buffer; // ok, but how to remove?
+            stack_top += 1;
             //printf("check: %s\n", stack[top]);
 
-        } else if (buffer == ')'){
-            bracket_balance += 1;
+        } else if (buffer == ')') {
+            bracket_deep -= 1;
             
+            // in any case add Space and Buffer when pushing into result!
             
-        } else if ( is_operator(buffer) == 1 ) {
-            // operator...
+            // pop all from the end untill (
             
-            
-            
+            while (buffer != '(') {
+                buffer = stack[stack_top];
+                result_str += ' ' + buffer;
+                stack_top-- ;
                 
-                
+                printf("current buffer: %c\n", buffer);
+            }
+            
         } else {
-            
-            // append char to buffer string
-            
-            // --- stopped here ---
-            
-            if (flag == 0)
-                flag = 1;
-            
+            // wrong char!
+            printf("[error] - wrong char: '%c'", buffer);
+            exit(1);
         }
         
-        if (flag == 1) {
-            // move buffer to double, save to stack
+        if (bracket_deep < 0) {
+            printf("--wrong bracket expr!\n");
         }
         
         index++ ;
     }
     
-    if (bracket_balance == 0)
-        return evaulate_rpn(stack, top);
+    if (bracket_deep == 0)
+        //return evaulate_rpn(stack, stack_top);
+        return 0.0;
     else {
-        printf("[error]"); // wrong brackets
+        // wrong brackets
+        printf("[error] - wrong brackets");
         exit(1);
     }
 }
@@ -180,6 +202,18 @@ int main(int argc, const char * argv[]) {
             }
             // can add resizing later here!
         }
+        
+        printf("%zu", operand_allowed('+'));
+        exit(1);
+        
+        /*
+        printf("\ncheck input:\n");
+        for (int i = 0; i < len; ++i) {
+            printf("%c", expression[i]);
+        }
+        exit(0);
+        */
+        
         double result = create_rpn(expression, len);
         
         //char* test[] = {"1", "2", "+", "3", "4", "-", "+"}; // 2.00
