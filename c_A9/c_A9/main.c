@@ -27,6 +27,11 @@ const char* keys[] = {"Date:", "From:", "To:", "Subject:"};
 
 void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
     char* line = (char* )malloc(MAX_SIZE*sizeof(char));
+    if (line == NULL) {
+        printf("[error]");
+        exit(0);
+    }
+    
     size_t j = 0;
     size_t key_size = 0;
     size_t parsed_ok = 0; // 1 - match, 0 - no matches
@@ -46,10 +51,10 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
                         parsed_ok = 0;
                         break; // it is not a key
                     }
-                    j += 1;
+                    j++ ;
                 }
                 if (parsed_ok == 1) {
-                    out[current_out_index] = (char* )malloc(MAX_SIZE*sizeof(char)); // allocate on-the-go
+                    out[current_out_index] = (char* )malloc(strlen(inp[i])*sizeof(char)); // allocate on-the-go
                     strcpy(out[current_out_index], line); // perfect
                     current_out_index += 1;
                     break; // one key was found, no more in current char
@@ -61,6 +66,7 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
     free(line);
 }
 
+//#define DEBUG
 
 int main(){
     char** big_array = (char** )malloc(sizeof(char* ));
@@ -72,14 +78,17 @@ int main(){
     // fill array while any data
     size_t size = 0;
     char* buff = (char* )malloc(MAX_SIZE*sizeof(char));
+    if (buff == NULL) {
+        printf("[error]");
+        return 0;
+    }
     while (fgets(buff, MAX_SIZE, stdin) != NULL) {
         big_array[size] = (char* )malloc(MAX_SIZE*sizeof(char)); // allocate on-the-go
         strcpy(big_array[size], buff);
-        size += 1;
+        size++ ;
         
         big_array = (char**)realloc(big_array, (size + 1)*sizeof(char* ));
         if (big_array == NULL) {
-            free(big_array);
             printf("[error]");
             return 0;
         }
@@ -90,12 +99,14 @@ int main(){
         free(big_array);
         return 0;
     }
-    /*
-    // debug...
+    
+#ifdef DEBUG
     printf("\n------ check inp ------\ngot %zu lines\n\n", size);
     for (size_t i = 0; i < size; ++i) {
         printf("%s", big_array[i]);
-    }*/
+    }
+#endif
+#undef DEBUG
     
     char** result = (char** )malloc(size*sizeof(char* ));
     if (result == NULL) {
