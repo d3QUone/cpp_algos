@@ -63,10 +63,10 @@ void mail_filter(char** inp, size_t lines, char** out, size_t* out_size){
 
 
 int main(){
-    char** big_array = (char** )malloc(MAX_SIZE*sizeof(char* ));
+    char** big_array = (char** )malloc(sizeof(char* ));
     if (big_array == NULL) {
         printf("[error]");
-        exit(1);
+        return 0; // correct Ejudje exitcode
     }
     
     // fill array while any data
@@ -76,13 +76,19 @@ int main(){
         big_array[size] = (char* )malloc(MAX_SIZE*sizeof(char)); // allocate on-the-go
         strcpy(big_array[size], buff);
         size += 1;
+        
+        big_array = (char**)realloc(big_array, (size + 1)*sizeof(char* ));
+        if (big_array == NULL) {
+            free(big_array);
+            printf("[error]");
+            return 0;
+        }
     }
     free(buff);
     
     if (size == 0) {
         free(big_array);
-        printf("[error]");
-        exit(1);
+        return 0;
     }
     /*
     // debug...
@@ -94,7 +100,7 @@ int main(){
     char** result = (char** )malloc(size*sizeof(char* ));
     if (result == NULL) {
         printf("[error]");
-        exit(1);
+        return 0;
     }
     
     // process

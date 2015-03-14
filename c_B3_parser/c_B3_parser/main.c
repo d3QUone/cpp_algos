@@ -39,19 +39,12 @@ size_t get_power(char op) {
     else if (op == 'm') // let binary minus has max priority
         return 5;
     else
-        return -1;
+        return 0;
 }
 
 
 // check if current char is operator
 size_t operator_allowed(char op) {
-    /*
-    if (strcmp(op, "+") == 0 || strcmp(op, "-") == 0 || strcmp(op, "*") == 0 ||
-        strcmp(op, "/") == 0 ||
-        strcmp(op, "m") == 0)
-        return 1;
-     */
-    
     if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm')
         return 1;
     else
@@ -59,7 +52,7 @@ size_t operator_allowed(char op) {
 }
 
 
-size_t operand_allowed(char op) {
+size_t digit_allowed(char op) {
     if (op == '1' || op == '2' || op == '3' ||
         op == '4' || op == '5' || op == '6' ||
         op == '7' || op == '8' || op == '9' ||
@@ -131,23 +124,24 @@ double create_rpn(char* exp, size_t len){
     int bracket_deep = 0; // ? may be no need // check inside Stack repush
     size_t index = 0;
     while (index < len) {
-        buffer = exp[index]; printf("'%c', size = %zu\n", buffer, sizeof(buffer));
+        buffer = exp[index]; //printf("'%c', size = %zu\n", buffer, sizeof(buffer));
         
-        if (operand_allowed(buffer) == 1) {
+        if (digit_allowed(buffer) == 1) {
             result_str += buffer;
             
-        } else if (operand_allowed(buffer) == 1) {
+        } else if (operator_allowed(buffer) == 1) {
             stack += buffer;
+            stack_top += 1;
             
             // pop -> push to res
             
         } else if (buffer == '(') {
-            bracket_deep += 1;
-            
             stack += buffer; // ok, but how to remove?
             stack_top += 1;
             //printf("check: %s\n", stack[top]);
 
+            bracket_deep += 1;
+            
         } else if (buffer == ')') {
             bracket_deep -= 1;
             
@@ -157,13 +151,20 @@ double create_rpn(char* exp, size_t len){
             
             while (buffer != '(') {
                 buffer = stack[stack_top];
-                result_str += ' ' + buffer;
-                stack_top-- ;
                 
-                printf("current buffer: %c\n", buffer);
+                result_str += ' ' + buffer;
+                
+                if (stack_top == 0) {
+                    break;
+                } else {
+                    stack_top-- ;
+                }
+                
+                printf("current buffer '%c', top: %zu\n", buffer, stack_top);
             }
             
-        } else {
+        }
+        else {
             // wrong char!
             printf("[error] - wrong char: '%c'", buffer);
             exit(1);
@@ -195,6 +196,8 @@ int main(int argc, const char * argv[]) {
     } else {
         // get input
         size_t len = 0;
+        
+        // switch to getch ???
         while (scanf("%c", &expression[len]) != -1) {
             if (expression[len] != ' ') {
                 len ++;
@@ -202,10 +205,6 @@ int main(int argc, const char * argv[]) {
             }
             // can add resizing later here!
         }
-        
-        printf("%zu", operand_allowed('+'));
-        exit(1);
-        
         /*
         printf("\ncheck input:\n");
         for (int i = 0; i < len; ++i) {
