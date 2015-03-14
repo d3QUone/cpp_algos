@@ -102,6 +102,16 @@ block CStack::pop(){
 }
 
 
+/*
+ 5_3. Прямоугольники.
+ 
+ Дана последовательность ​N​ прямоугольников различной ширины и высоты (w​i,​h​i)​.
+ Прямоугольники расположены, начиная с точки (0, 0), на оси ОХ вплотную друг за другом (вправо).
+ Требуется найти ​M​­ площадь максимального прямоугольника (параллельного осям координат),
+ который можно вырезать из этой фигуры.
+ */
+
+
 ///////// PROCESSOR /////////
 
 size_t find_max(block* input, int ssize){
@@ -124,15 +134,14 @@ size_t find_max(block* input, int ssize){
             
             // cut from (index - 1) - the first bigger block - OK
             for (int k = index - 1; k >= 0; --k) {
-//                size_t comp1 = input[index].height; // just for debug
-//                size_t comp2 = input[k].height;
+                //size_t comp1 = input[index].height; size_t comp2 = input[k].height;
                 if (input[index].height < input[k].height) {
                     
-                    // do full Sq eval here: array [0; index) must be sorted, eval it's Total sq - OK
+                    // do full Sq eval here: array [0; index) is sorted - OK
                     for (int i = 0; i < index; ++i) {
                         buf_max = 0;
-                        for (int k = i; k < index; ++k) {
-                            buf_max += input[i].height*input[k].width;
+                        for (int l = i; l < index; ++l) {
+                            buf_max += input[i].height*input[l].width;
                         }
                         if (buf_max > max) {
                             max = buf_max;
@@ -142,8 +151,10 @@ size_t find_max(block* input, int ssize){
                     input[k].height = input[index].height;
                     //printf("->  %zu; max now: %zu\n", input[k].height, max);
                 } else {
+                    //printf("steps = %i (k = %i; k0 = %i)\n", index - 1 - k, k, index - 1);
                     break;
                 }
+                //printf("steps = %i (k = %i; k0 = %i)\n", index - 1 - k, k, index - 1);
             }
         }
         last_height = input[index].height;
@@ -168,5 +179,6 @@ int main(int argc, const char * argv[]) {
     input_blocks[n].height = 0;
     
     size_t max = find_max(input_blocks, n + 1);
-    std::cout << "\nProcessing... Max = " << max << "\n";
+    std::cout << "\nProcessing... Max = " << max << "\n"; // debug
+    //std::cout << max; // release
 }
