@@ -113,7 +113,7 @@ void generate_test(){
     }
 }
 
-// tests aren't unfinished yet
+// tests aren't finished yet
 int main_test(){
     //freopen_s();
     //generate_test();
@@ -155,12 +155,19 @@ int main_test(){
 
 /*
  короче в стэк кидал прямоугольник, только если его высота больше предыдущего
- если меньше
- рассматривал его площадь
- рассматривал площади предущих, вернее
+ если меньше - рассматривал площади предущих,
  и доставал их из стэка, но оставлял прямоугольник с его шириной, но высотой предыдущего
  и так, пока не дойду до прямоугольника с высотой ниже высоты нового
 */
+
+
+
+struct block{
+    int width;
+    int height;
+};
+
+// creat Stack-of-blocks
 
 
 int max_sq(int n, int* blocks) {
@@ -200,7 +207,8 @@ int main(int argc, const char * argv[]) {
     
     // [0, 1], [2, 3], [4, 5], ..., [2*i, 2i+1], ...
     int* bl = new int[2*n];
-    for( int i = 0; i < n; ++i) std::cin >> bl[2*i] >> bl[2*i+1];
+    for( int i = 0; i < n; ++i)
+        std::cin >> bl[2*i] >> bl[2*i+1];
     
     std::cout << max_sq(n, bl);
     return 0;
