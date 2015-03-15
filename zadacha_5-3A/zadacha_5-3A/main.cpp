@@ -179,6 +179,6 @@ int main(int argc, const char * argv[]) {
     input_blocks[n].height = 0;
     
     size_t max = find_max(input_blocks, n + 1);
-    std::cout << "\nProcessing... Max = " << max << "\n"; // debug
-    //std::cout << max; // release
+    //std::cout << "\nProcessing... Max = " << max << "\n"; // debug
+    std::cout << max; // release
 }

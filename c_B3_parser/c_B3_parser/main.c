@@ -63,21 +63,27 @@ size_t digit_allowed(char op) {
 }
 
 
-/*
 // evaulates array in Postfix
-double evaulate_rpn(char** exp, size_t len) {
-
-    // update to parse chars by ' ' (spaces), not array
-    
+double evaulate_rpn(char* exp, size_t len) {
     double* stack = (double* ) malloc(len*sizeof(double)); // stack for operands
     size_t place = 0; // current stack size
     
     double a1 = 0.0;
     double a2 = 0.0; // buffers to save stack items
     
+    //char* buffer = (char* )malloc(30);
+    char buffer;
+    size_t x0 = 0; // index of last space
+    
     for (size_t i = 0; i < len; ++i) {
-        printf("%s\n", exp[i]);
-        
+        if (exp[i] == ' ') {
+            for (size_t j = x0; j < i; ++j) {
+                buffer += exp[j]; // ? strcat ?
+            }
+            x0 = i + 1;
+            printf("buf = %c", buffer);
+        }
+        /*
         if ( is_operator(*exp[i]) == 1) {
             // takes out last 2 operands, processes
             if (place > 1) {
@@ -97,17 +103,18 @@ double evaulate_rpn(char** exp, size_t len) {
             } else {
                 // wrong order / anything else
                 printf("[error]");
-                exit(1);
+                exit(0);
             }
         } else {
             // is operand -> convert char to double -> save double to stack
             stack[place] = atof(exp[i]);
             place++ ;
         }
+         */
     }
     return stack[0]; // result here
 }
- */
+
 
 
 // transform from Infix to Postfix notation
@@ -131,19 +138,19 @@ double create_rpn(char* exp, size_t len){
             
         } else if (operator_allowed(buffer) == 1) {
             stack += buffer;
-            stack_top += 1;
+            stack_top++ ;
             
             // pop -> push to res
             
         } else if (buffer == '(') {
             stack += buffer; // ok, but how to remove?
-            stack_top += 1;
+            stack_top++ ;
             //printf("check: %s\n", stack[top]);
 
-            bracket_deep += 1;
+            bracket_deep++ ;
             
         } else if (buffer == ')') {
-            bracket_deep -= 1;
+            bracket_deep-- ;
             
             // in any case add Space and Buffer when pushing into result!
             
@@ -162,28 +169,29 @@ double create_rpn(char* exp, size_t len){
                 
                 printf("current buffer '%c', top: %zu\n", buffer, stack_top);
             }
-            
         }
         else {
             // wrong char!
             printf("[error] - wrong char: '%c'", buffer);
-            exit(1);
+            exit(0);
         }
         
         if (bracket_deep < 0) {
             printf("--wrong bracket expr!\n");
+            exit(0);
         }
         
         index++ ;
     }
     
+    // present result
     if (bracket_deep == 0)
         //return evaulate_rpn(stack, stack_top);
         return 0.0;
     else {
         // wrong brackets
         printf("[error] - wrong brackets");
-        exit(1);
+        exit(0);
     }
 }
 
@@ -192,7 +200,7 @@ int main(int argc, const char * argv[]) {
     char* expression = (char* ) malloc(MAX_LEN*sizeof(char));
     if (expression == NULL) {
         printf("[error]");
-        exit(1);
+        exit(0);
     } else {
         // get input
         size_t len = 0;
@@ -200,7 +208,7 @@ int main(int argc, const char * argv[]) {
         // switch to getch ???
         while (scanf("%c", &expression[len]) != -1) {
             if (expression[len] != ' ') {
-                len ++;
+                len++ ;
                 // save everything except spaces
             }
             // can add resizing later here!
@@ -213,14 +221,19 @@ int main(int argc, const char * argv[]) {
         exit(0);
         */
         
-        double result = create_rpn(expression, len);
+        //double result = create_rpn(expression, len);
         
+        // -- v1 func --
         //char* test[] = {"1", "2", "+", "3", "4", "-", "+"}; // 2.00
         //char* test[] = {"10.3", "2", "+", "3", "4", "+", "+"}; // 19.30
         //char* test[] = {"11", "3", "9", "*", "+"}; // 38.00
         //double result = evaulate_rpn(test, sizeof(test)/sizeof(char* ));
         
-        printf("%.2f", result);
+        // -- v2 func --
+        char* test = "10.3 20.1 + 31 491.3 - +";
+        double result = evaulate_rpn(test, sizeof(test));
+        
+        //printf("%.2f", result);
         free(expression);
     }
     return 0;
