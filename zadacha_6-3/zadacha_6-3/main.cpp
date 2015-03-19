@@ -10,12 +10,6 @@
 #include <assert.h>
 
 
-/*
- Тупики. Очередь электричек, упорядоченных по времени отъезда. 
- Извлекаются отбывшие электрички на момент прибытия новой.
-*/
-
-
 // Dynamic array of ints
 
 class CArray {
@@ -28,6 +22,8 @@ public:
     int& operator[] (int index);
     void Add(int element);
     int Size() { return realSize; }
+    bool isEmpty() { return realSize == 0; }
+    void deleteFirst();
     
 private:
     int* buffer;
@@ -66,6 +62,16 @@ void CArray::Add(int element) {
 }
 
 
+void CArray::deleteFirst() {
+    assert(realSize > 1);
+    int* new_buffer = new int[realSize--];
+    for (int i = 0; i < realSize; ++i) {
+        new_buffer[i] = buffer[i+1];
+    }
+    delete [] buffer;
+    buffer = new_buffer;
+}
+
 
 // do Heap on Dynamic array!
 
@@ -91,7 +97,49 @@ void SiftDown(CArray& arr, int i){
 }
 
 
+void SiftUp(CArray& arr, int i) {
+    int parrent = 0;
+    while (i > 0) {
+        parrent = (i - 1)/2;
+        if (arr[i] < arr[parrent])
+            break;
+        std::swap(arr[i], arr[parrent]);
+        i = parrent;
+    }
+}
 
+
+void BuildHeap(CArray& arr, int i) {
+    for (int i = arr.Size() / 2 - 1; i >= 0; --i) {
+        SiftDown(arr, i);
+    }
+}
+
+
+void Add(CArray& arr, int item) {
+    arr.Add(item);
+    SiftUp(arr, arr.Size() - 1); // sift up from its current place
+}
+
+
+/// order by out-max
+
+int ExtractMax(CArray& arr) {
+    assert(!arr.isEmpty());
+    
+    int result = arr[0];
+    arr.deleteFirst();
+    if (!arr.isEmpty()) {
+        SiftDown(arr, 0);
+    }
+    return result;
+}
+
+
+/*
+ Тупики. Очередь электричек, упорядоченных по времени отъезда.
+ Извлекаются отбывшие электрички на момент прибытия новой.
+ */
 
 
 int min_routes(int* time_in, int* time_out, int n){
