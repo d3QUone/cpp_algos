@@ -9,7 +9,7 @@
 #include <iostream>
 #include <assert.h>
 
-
+/*
 // Dynamic array of ints
 
 class CArray {
@@ -17,9 +17,10 @@ public:
     CArray(): buffer(0), bufferSize(0), realSize(0) {}
     ~CArray() { delete [] buffer; }
     
-    int GetAt(int index) const; // ? to int?
-    int operator[] (int index) const { return GetAt(index); }
-    int& operator[] (int index);
+    int GetAt(int index) const;
+    //int operator[] (int index) const { return GetAt(index); }
+    //int& operator[] (int index);
+    
     void Add(int element);
     int Size() { return realSize; }
     bool isEmpty() { return realSize == 0; }
@@ -71,33 +72,58 @@ void CArray::deleteFirst() {
     delete [] buffer;
     buffer = new_buffer;
 }
+ */
 
 
-// do Heap on Dynamic array!
+// do Heap on array!
+/*
+class Heap {
+public:
+    Heap(): size(0), buffer(0) {}
+    ~Heap() { delete [] buffer; }
+    
+    void SiftUp();
+    
+private:
+    int size;
+    int* buffer;
+};
+*/
 
-void SiftDown(CArray& arr, int i){
+
+
+// heap methods
+
+void SiftDown(int* arr, int size, int i){
     // branches
     int left = 2*i + 1;
     int right = 2*i + 2;
     
     // find the largest Child
     int largest = i;
-    if (left < arr.Size() && arr[left] > arr[i]) {
+    if (left < size && arr[left] > arr[i]) {
         largest = left;
     }
-    if (right < arr.Size() && arr[right] > arr[largest]) {
+    if (right < size && arr[right] > arr[largest]) {
         largest = right;
     }
     
     // Sift if any largest
     if (largest != i) {
         std::swap(arr[i], arr[largest]);
-        SiftDown(arr, largest);
+        SiftDown(arr, size, largest);
     }
 }
 
 
-void SiftUp(CArray& arr, int i) {
+void BuildHeap(int* arr, int size, int i) {
+    for (int i = size/2 - 1; i >= 0; --i) {
+        SiftDown(arr, size, i);
+    }
+}
+
+
+void SiftUp(int* arr, int i) {
     int parrent = 0;
     while (i > 0) {
         parrent = (i - 1)/2;
@@ -109,28 +135,25 @@ void SiftUp(CArray& arr, int i) {
 }
 
 
-void BuildHeap(CArray& arr, int i) {
-    for (int i = arr.Size() / 2 - 1; i >= 0; --i) {
-        SiftDown(arr, i);
-    }
+void Add(int* arr, int size, int item) {
+    arr[size++] = item;
+    SiftUp(arr, size - 1); // sift up from its current place
 }
 
 
-void Add(CArray& arr, int item) {
-    arr.Add(item);
-    SiftUp(arr, arr.Size() - 1); // sift up from its current place
-}
-
-
-/// order by out-max
-
-int ExtractMax(CArray& arr) {
-    assert(!arr.isEmpty());
-    
+int ExtractMax(int* arr, int size) {
+    assert(size > 0);
     int result = arr[0];
-    arr.deleteFirst();
-    if (!arr.isEmpty()) {
-        SiftDown(arr, 0);
+    
+    int* new_buffer = new int[size--];
+    for (int i = 0; i < size; ++i) {
+        new_buffer[i] = arr[i+1];
+    }
+    delete [] arr;
+    arr = new_buffer;
+    
+    if (size != 0) {
+        SiftDown(arr, size, 0);
     }
     return result;
 }
@@ -143,11 +166,36 @@ int ExtractMax(CArray& arr) {
 
 
 int min_routes(int* time_in, int* time_out, int n){
-    // sort by out..
+    int* heap = new int[n];
+    int size = 0;
     
-    // reheap heap on every arr item..
+    int current_depart_time = 0;
+    int current_arrive_time = 0;
     
-    
+    for (int i = 0; i < n; ++i) {
+        current_arrive_time = time_in[i];
+        current_depart_time = time_out[i]; // sort it: min dep-time on the top
+        
+        // 1) delete all trains form tail to head which depart_i < curr arrive time
+        std::cout << "\nSize: " << size << ", last item: " << heap[size] << ", curr arive time: " << current_arrive_time << "\n";
+        
+        while (size > 0 && heap[size] < current_arrive_time && heap[size] > 0) {
+            std::cout << "Decr..\n";
+            size-- ;
+        }
+        
+        
+        // 2) Add(heap, size++, current_depart_time);
+        // sort by min out..
+        heap[size++] = current_depart_time;
+        BuildHeap(heap, size, size-1);
+        
+        std::cout << "Size: " << size << ", heap: ";
+        for (int j = 0; j < size; ++j) {
+            std::cout << heap[j] << " ";
+        }
+        std::cout << "\n";
+    }
     return 0;
 }
 
@@ -163,7 +211,7 @@ int main(){
     }
     
     int res = min_routes(heap_time_in, heap_time_out, n);
-    std::cout << "Min routes = " << res;
+    std::cout << "\nMin routes = " << res << "\n";
 }
 
 

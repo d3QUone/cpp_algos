@@ -19,9 +19,12 @@ struct block{
 
 
 struct ledge{
-    size_t x; // left corner
+    //size_t x; // left corner
+    
+    size_t width;
     size_t height;
 };
+
 
 ///////// NODE /////////
 
@@ -30,7 +33,7 @@ struct CNode {
     CNode* Next;
     
     CNode(ledge data) {
-        data.x = Data.x;
+        data.width = Data.width;
         data.height = Data.height;
         Next = 0;
     };
@@ -121,7 +124,7 @@ ledge CStack::pop(){
 
 /*
  
- Прямоугольники. В стек помещайте ступени в порядке увеличения высоты: пары
+ В стек помещайте ступени в порядке увеличения высоты: пары
  <начало ступени, ее высота>. В стеке лежит своего рода лестница. При появлении нового
  прямоугольника бОльшей высоты, добавляйте его в стек как ступеньку. При появлении нового
  прямоугольника меньшей высоты, срезайте вершок со всех бОльших ступенек из
@@ -145,16 +148,52 @@ ledge CStack::pop(){
  */
 
 
-size_t new_try(block* input, size_t ssize) {
+size_t new_try(ledge* input, size_t ssize) {
+    int max_square = 0;
+    int last_height = 0;
+    int length = 0;
+    
+    CStack* SStack = new CStack;
     
     
-    
+    for (int i = 0; i < ssize; ++i) {
+        
+        length += input[i].width;
+        
+        
+        if (input[i].height > last_height) {
+            SStack -> push(input[i]);
+        } else {
+            
+            
+            
+        }
+        
+    }
     
     return 0;
 }
 
 
-
+int main(){
+    int n = 0;
+    std::cin >> n;
+    
+    // make array of structs, save blocks there
+    ledge input_blocks[n];
+    for (int i = 0; i < n; ++i) {
+        std::cin >> input_blocks[i].width;
+        std::cin >> input_blocks[i].height;
+    }
+    // gap to make the algorythm  work more generic
+    input_blocks[n].width = 10;
+    input_blocks[n].height = 0;
+    
+    size_t max = new_try(input_blocks, n + 1);
+    std::cout << max; // release
+    
+    return 0;
+}
 
 
 
@@ -209,7 +248,7 @@ size_t find_max(block* input, int ssize){
 }
 
 
-int main(int argc, const char * argv[]) {
+int main_old(int argc, const char * argv[]) {
     // get number of Blocks
     int n = 0;
     std::cin >> n;
@@ -227,4 +266,5 @@ int main(int argc, const char * argv[]) {
     size_t max = find_max(input_blocks, n + 1);
     //std::cout << "\nProcessing... Max = " << max << "\n"; // debug
     std::cout << max; // release
+    return 0;
 }
