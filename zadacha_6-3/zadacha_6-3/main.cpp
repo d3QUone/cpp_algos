@@ -10,8 +10,7 @@
 #include <assert.h>
 
 /*
-// Dynamic array of ints
-
+// bad Dynamic array of ints
 class CArray {
 public:
     CArray(): buffer(0), bufferSize(0), realSize(0) {}
@@ -76,19 +75,21 @@ void CArray::deleteFirst() {
 
 
 // do Heap on array!
-/*
+
 class Heap {
 public:
-    Heap(): size(0), buffer(0) {}
-    ~Heap() { delete [] buffer; }
+    Heap(): size(0), arr(0) {}
+    ~Heap() { delete [] arr; }
     
-    void SiftUp();
+    void SiftDown(int i);
+    void SiftUp(int i);
+    int ExtractMin();
     
 private:
     int size;
-    int* buffer;
+    int* arr;
 };
-*/
+
 
 
 
@@ -139,9 +140,9 @@ int ExtractMin(int* arr, int size) {
     assert(size >= 0);
     int result = arr[0];
     
-    arr[0] = arr[--size];
+    arr[0] = arr[--size]; // last index = size - 1
     if (size > 0) {
-        SiftDown(arr, size, 0);
+        SiftDown(arr, size, 0); // new size now = old size - 1
     }
     return result;
 }
