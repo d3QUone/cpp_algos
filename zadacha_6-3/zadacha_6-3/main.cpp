@@ -176,27 +176,25 @@ int min_routes(int* time_in, int* time_out, int n){
         current_arrive_time = time_in[i];
         current_depart_time = time_out[i]; // sort it: min dep-time on the top
         
-        // 1) delete all trains form tail to head which depart_i < curr arrive time
-        std::cout << "\nSize: " << size << ", last item: " << heap[size] << ", curr arive time: " << current_arrive_time << "\n";
-        
-        while (size > 0 && heap[size] < current_arrive_time && heap[size] > 0) {
-            std::cout << "Decr..\n";
+        // 1) delete all trains form tail to head which have departed
+        while (size > 0 && heap[size-1] < current_arrive_time) {
             size-- ;
         }
-        
         
         // 2) Add(heap, size++, current_depart_time);
         // sort by min out..
         heap[size++] = current_depart_time;
         BuildHeap(heap, size, size-1);
         
-        std::cout << "Size: " << size << ", heap: ";
+        /*
+        std::cout << "heap: ";
         for (int j = 0; j < size; ++j) {
             std::cout << heap[j] << " ";
         }
         std::cout << "\n";
+        */
     }
-    return 0;
+    return size;
 }
 
 
@@ -211,7 +209,7 @@ int main(){
     }
     
     int res = min_routes(heap_time_in, heap_time_out, n);
-    std::cout << "\nMin routes = " << res << "\n";
+    std::cout << res;
 }
 
 
