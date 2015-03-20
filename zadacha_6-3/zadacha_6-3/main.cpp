@@ -72,7 +72,7 @@ void CArray::deleteFirst() {
     delete [] buffer;
     buffer = new_buffer;
 }
- */
+*/
 
 
 // do Heap on array!
@@ -99,19 +99,19 @@ void SiftDown(int* arr, int size, int i){
     int left = 2*i + 1;
     int right = 2*i + 2;
     
-    // find the largest Child
-    int largest = i;
-    if (left < size && arr[left] > arr[i]) {
-        largest = left;
+    // find the min Child
+    int min = i;
+    if (left < size && arr[left] < arr[i]) {
+        min = left;
     }
-    if (right < size && arr[right] > arr[largest]) {
-        largest = right;
+    if (right < size && arr[right] < arr[min]) {
+        min = right;
     }
     
-    // Sift if any largest
-    if (largest != i) {
-        std::swap(arr[i], arr[largest]);
-        SiftDown(arr, size, largest);
+    // Sift if any
+    if (min != i) {
+        std::swap(arr[i], arr[min]);
+        SiftDown(arr, size, min);
     }
 }
 
@@ -127,7 +127,7 @@ void SiftUp(int* arr, int i) {
     int parrent = 0;
     while (i > 0) {
         parrent = (i - 1)/2;
-        if (arr[i] < arr[parrent])
+        if (arr[i] >= arr[parrent])
             break;
         std::swap(arr[i], arr[parrent]);
         i = parrent;
@@ -141,18 +141,12 @@ void Add(int* arr, int size, int item) {
 }
 
 
-int ExtractMax(int* arr, int size) {
-    assert(size > 0);
+int ExtractMin(int* arr, int size) {
+    assert(size >= 0);
     int result = arr[0];
     
-    int* new_buffer = new int[size--];
-    for (int i = 0; i < size; ++i) {
-        new_buffer[i] = arr[i+1];
-    }
-    delete [] arr;
-    arr = new_buffer;
-    
-    if (size != 0) {
+    arr[0] = arr[size-- ];
+    if (size > 0) {
         SiftDown(arr, size, 0);
     }
     return result;
@@ -167,34 +161,47 @@ int ExtractMax(int* arr, int size) {
 
 int min_routes(int* time_in, int* time_out, int n){
     int* heap = new int[n];
-    int size = 0;
+    int size = 0; // num of current fulled ro
+    int real_size = 0;
     
     int current_depart_time = 0;
     int current_arrive_time = 0;
+    int min_time = 0;
     
     for (int i = 0; i < n; ++i) {
-        current_arrive_time = time_in[i];
-        current_depart_time = time_out[i]; // sort it: min dep-time on the top
+        std::cout << "------------------------\n";
         
-        // 1) delete all trains form tail to head which have departed
-        while (size > 0 && heap[size-1] < current_arrive_time) {
-            size-- ;
+        current_arrive_time = time_in[i];
+        current_depart_time = time_out[i];
+        
+        // min at root
+        if (size > 0) {
+            min_time = heap[0];
+            std::cout << "Min time now = " << min_time << "\n";
+            
+            while (min_time < current_arrive_time && size > 0){
+                min_time = ExtractMin(heap, size--);
+            }
         }
         
-        // 2) Add(heap, size++, current_depart_time);
-        // sort by min out..
-        heap[size++] = current_depart_time;
-        BuildHeap(heap, size, size-1);
+        // add new item in heap
+        heap[size] = current_depart_time;
+        SiftUp(heap, size);
+        size++ ;
         
-        /*
+        // debug print
         std::cout << "heap: ";
         for (int j = 0; j < size; ++j) {
             std::cout << heap[j] << " ";
         }
         std::cout << "\n";
-        */
+        
+        
+        if (size > real_size) {
+            real_size = size;
+        }
     }
-    return size;
+    return real_size;
 }
 
 
@@ -211,5 +218,3 @@ int main(){
     int res = min_routes(heap_time_in, heap_time_out, n);
     std::cout << res;
 }
-
-
