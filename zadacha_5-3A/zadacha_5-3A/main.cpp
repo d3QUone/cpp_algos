@@ -9,120 +9,8 @@
 #include <iostream>
 #include <assert.h>
 
-
-///////// MAIN STRUCTURE /////////
-
-struct block{
-    size_t width;
-    size_t height;
-};
-
-
-struct ledge{
-    //size_t x; // left corner
-    
-    size_t width;
-    size_t height;
-};
-
-
-///////// NODE /////////
-
-struct CNode {
-    ledge Data;
-    CNode* Next;
-    
-    CNode(ledge data) {
-        data.width = Data.width;
-        data.height = Data.height;
-        Next = 0;
-    };
-};
-
-
-///////// LIST /////////
-
-class CList {
-public:
-    CList(): first(0) {};
-    ~CList();
-    
-    void add_first(CNode*);
-    void del_first();
-    CNode* get_first() { return first; }
-    bool is_empty() const { return first == 0; };
-
-private:
-    CNode* first;
-};
-
-
-CList::~CList(){
-    while (first != 0) {
-        del_first();
-    }
-}
-
-
-void CList::add_first(CNode* node) {
-    if (first == 0){
-        first = node;
-    } else {
-        CNode* second = first;
-        first = node;
-        node->Next = second;
-    }
-}
-
-
-void CList::del_first() {
-    assert(first != 0);
-    
-    CNode* second = first -> Next;
-    delete first;
-    first = second;
-}
-
-
-///////// STACK /////////
-
-class CStack {
-public:
-    CStack() {};
-    void push( ledge x );
-    ledge pop();
-    
-private:
-    CList* list;
-};
-
-
-void CStack::push(ledge x) {
-    list->add_first(new CNode(x));
-}
-
-
-ledge CStack::pop(){
-    assert(list->is_empty() == false);
-    ledge data = list->get_first()->Data;
-    list->del_first();
-    return data;
-}
-
-
 /*
  5_3. Прямоугольники.
- 
- Дана последовательность ​N​ прямоугольников различной ширины и высоты (w​i,​h​i)​.
- Прямоугольники расположены, начиная с точки (0, 0), на оси ОХ вплотную друг за другом (вправо).
- Требуется найти ​M​­ площадь максимального прямоугольника (параллельного осям координат),
- который можно вырезать из этой фигуры.
- */
-
-
-// building with stack //
-
-/*
  
  В стек помещайте ступени в порядке увеличения высоты: пары
  <начало ступени, ее высота>. В стеке лежит своего рода лестница. При появлении нового
@@ -144,34 +32,104 @@ ledge CStack::pop(){
  После просмотра всех прямоугольников нужно аналогично пересмотреть все
  накопленные ступени. Можно добавить фиктивный прямоугольник высоты 0, чтобы
  автоматически срезать все накопленные ступени и обновить максимум.
- 
  */
 
 
+///// stack on dynamic array
+
+struct ledge{
+    size_t width;
+    size_t height;
+};
+
+class Stack{
+    ledge* buffer;
+    size_t bufferSize;
+    int realSize;
+public:
+    Stack(size_t _bufferSize) : bufferSize(_bufferSize), realSize(0){
+        buffer = new ledge[bufferSize];
+    }
+    ~Stack(){
+        delete[] buffer;
+    }
+    void push(ledge a);
+    ledge pop();
+    //void grow();
+    bool isEmpty() const{ return realSize == 0; }
+};
+
+/*
+ void Stack::grow(){
+	int newBufferSize = bufferSize * 2;
+	int* newBuffer = new int[newBufferSize];
+ 
+	memcpy(newBuffer, buffer, realSize);
+ 
+	delete[] buffer;
+	buffer = newBuffer;
+	bufferSize = newBufferSize;
+ }*/
+
+
+void Stack::push(ledge a){
+    assert(realSize < bufferSize);
+    //if (realSize == bufferSize)
+    //grow();
+    buffer[realSize++] = a;
+}
+
+
+ledge Stack::pop(){
+    assert(realSize > 0);
+    return buffer[--realSize];
+}
+
+
+
 size_t new_try(ledge* input, size_t ssize) {
-    int max_square = 0;
-    int last_height = 0;
-    int length = 0;
+    size_t max_square = 0;
     
-    CStack* SStack = new CStack;
+    size_t last_height = 0;
+    size_t buf_h = 0;
+    size_t buf_w = 0;
     
+    Stack* SStack = new Stack(ssize);
+    ledge item;
     
     for (int i = 0; i < ssize; ++i) {
         
-        length += input[i].width;
-        
-        
         if (input[i].height > last_height) {
             SStack -> push(input[i]);
+            
+            if (input[i].height * input[i].width > max_square) {
+                max_square = input[i].height*input[i].width;
+            }
         } else {
             
+            // load from stack?
+            item = SStack -> pop();
+            buf_h = item.height;
+            while (buf_h > input[i].height) {
+                
+                buf_w += item.width;
+                if (!SStack -> isEmpty()) {
+                    item = SStack -> pop();
+                    buf_h = item.height;
+                } else break;
+            }
             
+            // push big block, check sq
+            input[i].width += buf_w;
+            if (input[i].height * input[i].width > max_square) {
+                max_square = input[i].height*input[i].width;
+            }
             
+            SStack -> push(input[i]);
         }
-        
     }
-    
-    return 0;
+    delete SStack;
+    return max_square;
 }
 
 
@@ -190,18 +148,16 @@ int main(){
     input_blocks[n].height = 0;
     
     size_t max = new_try(input_blocks, n + 1);
-    std::cout << max; // release
-    
+    std::cout << max;
     return 0;
 }
-
 
 
 ///////// PROCESSOR /////////
 
 size_t find_max(block* input, int ssize){
-    size_t max = 0;            // maximum square
-    size_t buf_max = 0;        // bufferizy max for several blocks
+    long int max = 0;            // maximum square
+    long int buf_max = 0;        // bufferizy max for several blocks
     
     size_t last_height = 0;    // stores the height of last checked block
     size_t buffer_wid = 0;     // bufferizy forms
@@ -248,7 +204,7 @@ size_t find_max(block* input, int ssize){
 }
 
 
-int main_old(int argc, const char * argv[]) {
+int main_xx() {
     // get number of Blocks
     int n = 0;
     std::cin >> n;
@@ -263,8 +219,7 @@ int main_old(int argc, const char * argv[]) {
     input_blocks[n].width = 10;
     input_blocks[n].height = 0;
     
-    size_t max = find_max(input_blocks, n + 1);
-    //std::cout << "\nProcessing... Max = " << max << "\n"; // debug
+    long int max = find_max(input_blocks, n + 1);
     std::cout << max; // release
     return 0;
 }
