@@ -34,7 +34,6 @@
  автоматически срезать все накопленные ступени и обновить максимум.
  */
 
-
 ///// stack on dynamic array
 
 struct ledge{
@@ -98,7 +97,6 @@ size_t new_try(ledge* input, size_t ssize) {
     ledge item;
     
     for (int i = 0; i < ssize; ++i) {
-        
         if (input[i].height > last_height) {
             SStack -> push(input[i]);
             
@@ -117,6 +115,11 @@ size_t new_try(ledge* input, size_t ssize) {
                     item = SStack -> pop();
                     buf_h = item.height;
                 } else break;
+            }
+            std::cout << "buf_w = " << buf_w << "\n"; // ok, but not all
+            
+            if (buf_h * buf_w > max_square) {
+                max_square = buf_h * buf_w;
             }
             
             // push big block, check sq
@@ -154,6 +157,12 @@ int main(){
 
 
 ///////// PROCESSOR /////////
+
+struct block{
+    size_t width;
+    size_t height;
+};
+
 
 size_t find_max(block* input, int ssize){
     long int max = 0;            // maximum square
