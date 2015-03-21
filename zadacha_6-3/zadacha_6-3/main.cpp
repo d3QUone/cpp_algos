@@ -74,16 +74,21 @@ void CArray::deleteFirst() {
 */
 
 
-// do Heap on array!
-
 class Heap {
 public:
-    Heap(): size(0), arr(0) {}
+    Heap(int n) {
+        size = 0;
+        arr = new int[n];
+    }
     ~Heap() { delete [] arr; }
     
+    void AddItem(int item);
     void SiftDown(int i);
     void SiftUp(int i);
     int ExtractMin();
+    int GetSize() { return size; }
+    int firstItem() { return arr[0]; }
+    void print_items();
     
 private:
     int size;
@@ -91,16 +96,9 @@ private:
 };
 
 
-
-
-// heap methods
-
-void SiftDown(int* arr, int size, int i){
-    // branches
+void Heap::SiftDown(int i) {
     int left = 2*i + 1;
     int right = 2*i + 2;
-    
-    // find the min Child
     int min = i;
     if (left < size && arr[left] < arr[i]) {
         min = left;
@@ -108,44 +106,59 @@ void SiftDown(int* arr, int size, int i){
     if (right < size && arr[right] < arr[min]) {
         min = right;
     }
-    
     // Sift if any
     if (min != i) {
         std::swap(arr[i], arr[min]);
-        SiftDown(arr, size, min);
+        SiftDown(min);
     }
 }
 
 
+void Heap::SiftUp(int i) {
+    int parrent = (i - 1)/2;
+    while (i > 0) {
+        if (arr[i] >= arr[parrent]) {
+            break;
+        }
+        std::swap(arr[i], arr[parrent]);
+        i = parrent;
+        parrent = (i - 1)/2;
+    }
+}
+
+
+int Heap::ExtractMin() {
+    assert(size > 0);
+    int result = arr[0];
+    size-- ;
+    arr[0] = arr[size]; // last index = size - 1
+    SiftDown(0);
+    return result;
+}
+
+
+void Heap::AddItem(int item) {
+    arr[size] = item;
+    SiftUp(size);
+    size++ ;
+}
+
+
+void Heap::print_items() {
+    std::cout << "heap: ";
+    for (int j = 0; j < size; ++j) {
+        std::cout << arr[j] << " ";
+    }
+    std::cout << "\n";
+}
+
+
+/*
 void BuildHeap(int* arr, int size, int i) {
     for (int i = size/2 - 1; i >= 0; --i) {
         SiftDown(arr, size, i);
     }
-}
-
-
-void SiftUp(int* arr, int i) {
-    int parrent = 0;
-    while (i > 0) {
-        parrent = (i - 1)/2;
-        if (arr[i] >= arr[parrent])
-            break;
-        std::swap(arr[i], arr[parrent]);
-        i = parrent;
-    }
-}
-
-
-int ExtractMin(int* arr, int size) {
-    assert(size >= 0);
-    int result = arr[0];
-    
-    arr[0] = arr[--size]; // last index = size - 1
-    if (size > 0) {
-        SiftDown(arr, size, 0); // new size now = old size - 1
-    }
-    return result;
-}
+}*/
 
 
 /*
@@ -155,51 +168,36 @@ int ExtractMin(int* arr, int size) {
 
 
 int min_routes(int* time_in, int* time_out, int n){
-    int* heap = new int[n];
-    int size = 0; // num of current fulled routes
     int max_size = 0;
-    
     int current_depart_time = 0;
     int current_arrive_time = 0;
-    int min_time = 0;
+    
+    Heap* hip = new Heap(n);
     
     int debug = 0;
     
     for (int i = 0; i < n; ++i) {
-        if (debug == 1)
-            std::cout << "----------------------------------------\n";
+        if (debug == 1) std::cout << "--------------------------------\n";
         
         current_arrive_time = time_in[i];
         current_depart_time = time_out[i];
         
-        if (size > 0) {
-            min_time = heap[0]; // don't delete on checkup
-            std::cout << "Min time now = " << min_time << "\n";
-            while (min_time < current_arrive_time && size > 0) {
-                min_time = ExtractMin(heap, size--);
-                std::cout << "--min time now = " << min_time << "; size = " << size << "\n";
+        if (hip->GetSize() > 0) {
+            while (hip -> firstItem() < current_arrive_time && hip->GetSize() > 0) {
+                hip -> ExtractMin();
             }
         }
         
-        // Add new item in heap
-        heap[size] = current_depart_time;
-        SiftUp(heap, size);
-        size++ ;
+        hip -> AddItem(current_depart_time);
         
-        // max size of tree
-        if (size > max_size) {
-            max_size = size;
+        // check max size of tree
+        if (hip->GetSize() > max_size) {
+            max_size = hip->GetSize();
         }
         
-        if (debug == 1) {
-            std::cout << "heap: ";
-            for (int j = 0; j < size; ++j) {
-                std::cout << heap[j] << " ";
-            }
-            std::cout << "\n";
-        }
+        if (debug == 1) hip -> print_items();
     }
-    delete [] heap;
+    delete hip;
     return max_size;
 }
 
@@ -208,18 +206,14 @@ int main(){
     int n = 0;
     std::cin >> n;
     
-    int* heap_time_in = new int[n]; // прибытие
+    int* heap_time_in = new int[n];  // прибытие
     int* heap_time_out = new int[n]; // отбытие
     for (int i = 0; i < n; ++i) {
         std::cin >> heap_time_in[i] >> heap_time_out[i];
-        //std::cout << i << "\n";
     }
-    //std::cout << "Got " << n << "\n";
-    
     int res = min_routes(heap_time_in, heap_time_out, n);
-    std::cout << res << "\n";
+    std::cout << res;
     
     delete [] heap_time_in;
     delete [] heap_time_out;
-    return 0;
 }
