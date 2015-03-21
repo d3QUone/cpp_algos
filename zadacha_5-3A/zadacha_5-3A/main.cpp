@@ -34,28 +34,31 @@
  автоматически срезать все накопленные ступени и обновить максимум.
  */
 
-///// stack on dynamic array
+///// stack on array
 
-struct ledge{
+struct block{
     size_t width;
     size_t height;
 };
 
+
 class Stack{
-    ledge* buffer;
-    size_t bufferSize;
-    int realSize;
 public:
     Stack(size_t _bufferSize) : bufferSize(_bufferSize), realSize(0){
-        buffer = new ledge[bufferSize];
+        buffer = new block[_bufferSize];
     }
-    ~Stack(){
-        delete[] buffer;
-    }
-    void push(ledge a);
-    ledge pop();
-    //void grow();
+    ~Stack(){ delete[] buffer; }
+    
+    void push(block a);
+    block pop();
     bool isEmpty() const{ return realSize == 0; }
+    void print_items();
+    //void grow();
+    
+private:
+    block* buffer;
+    size_t bufferSize;
+    size_t realSize;
 };
 
 /*
@@ -70,66 +73,70 @@ public:
 	bufferSize = newBufferSize;
  }*/
 
-
-void Stack::push(ledge a){
+void Stack::push(block a){
     assert(realSize < bufferSize);
-    //if (realSize == bufferSize)
-    //grow();
+//    if (realSize == bufferSize) {
+//        grow();
+//    }
     buffer[realSize++] = a;
 }
 
-
-ledge Stack::pop(){
+block Stack::pop(){
     assert(realSize > 0);
     return buffer[--realSize];
 }
 
+void Stack::print_items() {
+    std::cout << "Stack print: ";
+    for (int i = 0; i < realSize; ++i) {
+        std::cout << buffer[i].width << "*" << buffer[i].height << " ";
+    }
+    std::cout << "\n";
+}
 
 
-size_t new_try(ledge* input, size_t ssize) {
+size_t new_try(block* input, size_t ssize) {
     size_t max_square = 0;
-    
     size_t last_height = 0;
-    size_t buf_h = 0;
-    size_t buf_w = 0;
     
     Stack* SStack = new Stack(ssize);
-    ledge item;
+    block item;
     
     for (int i = 0; i < ssize; ++i) {
         if (input[i].height > last_height) {
             SStack -> push(input[i]);
-            
             if (input[i].height * input[i].width > max_square) {
                 max_square = input[i].height*input[i].width;
             }
         } else {
-            
-            // load from stack?
+            // load from stack
             item = SStack -> pop();
-            buf_h = item.height;
+            size_t buf_w = 0;
+            size_t buf_h = item.height;
+            
             while (buf_h > input[i].height) {
-                
                 buf_w += item.width;
+                if (buf_h * buf_w > max_square) {
+                    max_square = buf_h * buf_w;
+                }
+                
                 if (!SStack -> isEmpty()) {
                     item = SStack -> pop();
                     buf_h = item.height;
                 } else break;
             }
-            std::cout << "buf_w = " << buf_w << "\n"; // ok, but not all
-            
-            if (buf_h * buf_w > max_square) {
-                max_square = buf_h * buf_w;
-            }
             
             // push big block, check sq
             input[i].width += buf_w;
-            if (input[i].height * input[i].width > max_square) {
+            if (input[i].width * input[i].height > max_square) {
                 max_square = input[i].height*input[i].width;
             }
             
             SStack -> push(input[i]);
         }
+        last_height = input[i].height;
+        
+        //SStack -> print_items(); // just see what happens there
     }
     delete SStack;
     return max_square;
@@ -141,13 +148,13 @@ int main(){
     std::cin >> n;
     
     // make array of structs, save blocks there
-    ledge input_blocks[n];
+    block input_blocks[n];
     for (int i = 0; i < n; ++i) {
         std::cin >> input_blocks[i].width;
         std::cin >> input_blocks[i].height;
     }
     // gap to make the algorythm  work more generic
-    input_blocks[n].width = 10;
+    input_blocks[n].width = 0;
     input_blocks[n].height = 0;
     
     size_t max = new_try(input_blocks, n + 1);
@@ -157,12 +164,6 @@ int main(){
 
 
 ///////// PROCESSOR /////////
-
-struct block{
-    size_t width;
-    size_t height;
-};
-
 
 size_t find_max(block* input, int ssize){
     long int max = 0;            // maximum square
@@ -200,35 +201,10 @@ size_t find_max(block* input, int ssize){
                     //printf("height: %zu ", input[k].height);
                     input[k].height = input[index].height;
                     //printf("->  %zu; max now: %zu\n", input[k].height, max);
-                } else {
-                    //printf("steps = %i (k = %i; k0 = %i)\n", index - 1 - k, k, index - 1);
-                    break;
-                }
-                //printf("steps = %i (k = %i; k0 = %i)\n", index - 1 - k, k, index - 1);
+                } else break;
             }
         }
         last_height = input[index].height;
     }
     return max;
-}
-
-
-int main_xx() {
-    // get number of Blocks
-    int n = 0;
-    std::cin >> n;
-    
-    // make array of structs, save blocks there
-    block input_blocks[n];
-    for (int i = 0; i < n; ++i) {
-        std::cin >> input_blocks[i].width;
-        std::cin >> input_blocks[i].height;
-    }
-    // gap to make the algorythm  work more generic
-    input_blocks[n].width = 10;
-    input_blocks[n].height = 0;
-    
-    long int max = find_max(input_blocks, n + 1);
-    std::cout << max; // release
-    return 0;
 }
