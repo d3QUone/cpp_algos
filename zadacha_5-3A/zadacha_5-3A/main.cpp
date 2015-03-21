@@ -109,12 +109,12 @@ size_t new_try(block* input, size_t ssize) {
                 max_square = input[i].height*input[i].width;
             }
         } else {
-            // load from stack
+            // load last item from stack
             item = SStack -> pop();
             size_t buf_w = 0;
             size_t buf_h = item.height;
             
-            while (buf_h > input[i].height) {
+            while (buf_h >= input[i].height) {
                 buf_w += item.width;
                 if (buf_h * buf_w > max_square) {
                     max_square = buf_h * buf_w;
@@ -153,7 +153,7 @@ int main(){
         std::cin >> input_blocks[i].width;
         std::cin >> input_blocks[i].height;
     }
-    // gap to make the algorythm  work more generic
+    // gap to make the algorythm work more generic
     input_blocks[n].width = 0;
     input_blocks[n].height = 0;
     

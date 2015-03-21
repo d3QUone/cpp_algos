@@ -12,15 +12,13 @@
 
 
 /*
-
 Требуется написать программу, которая способна вычислять арифметические выражения.
-Выражения могут содержать: 
- 1) знаки операций '+', '-', '/', '*' 
- 2) Скобки '(', ')' 
- 3) Целые и вещественные числа, в нотации '123', '123.345', все операции должны быть вещественны, а результаты выведены с точностю до двух знаков после запятой в том числе целые '2.00' 
- 4) необходимо учитывать приоритеты операций, и возможность унарного минуса, пробелы ничего не значат 
- 5) Если в выражении встретилась ошибка требуется вывести в стандартный поток вывода "[error]"
- 
+Выражения могут содержать: знаки операций '+', '-', '/', '*', cкобки '(', ')', целые и вещественные числа
+в нотации '123', '123.345'.
+все операции должны быть вещественны, а результаты выведены с точностю до двух знаков после запятой в том
+числе целые '2.00'. необходимо учитывать приоритеты операций, и возможность унарного минуса, 
+пробелы ничего не значат
+Если в выражении встретилась ошибка требуется вывести в стандартный поток вывода "[error]"
 */
 
 #define MAX_LEN 1024
@@ -117,62 +115,115 @@ double evaulate_rpn(char* exp, size_t len) {
 
 
 
+int grow_buffer(char** buffer, size_t current_size) {
+    
+    
+    
+    return 1;
+}
+
+
+
+
 // transform from Infix to Postfix notation
+
 double create_rpn(char* exp, size_t len){
-    // stack for ()+-*/
+    printf("got exp: %s, %zu chars\n\n", exp, len);
+    
+    int bracket_deep = 0; // ? may be no need // check inside Stack repush
+    
+    // stack of chars for operands ()+-*/
     char* stack = (char* ) malloc(len*sizeof(char));
     size_t stack_top = 0;  // position of last item in stack
     
-    // string for saving postfix notation
+    // buffer string for saving postfix notation ?
     char* result_str = (char* ) malloc(len*sizeof(char));
     size_t result_size = 0;
     
-    char buffer; // one current char
-    int bracket_deep = 0; // ? may be no need // check inside Stack repush
+    size_t rev_last = 0;
+    size_t rev_inited = 3;
+    char** reverse = (char** ) malloc(rev_inited*sizeof(char* )); // ready RPN!!!
+    
+    char* buffer = (char* ) malloc(1); // for one current char
+    
     size_t index = 0;
     while (index < len) {
-        buffer = exp[index]; //printf("'%c', size = %zu\n", buffer, sizeof(buffer));
+        //buffer = exp[index]; //printf("'%c', size = %zu\n", buffer, sizeof(buffer));
         
-        if (digit_allowed(buffer) == 1) {
-            result_str += buffer;
+        memcpy(buffer, &exp[index], 1);
+        printf("buffer = %s\n", buffer);
+        
+        if (digit_allowed(*buffer) == 1) {
+            strcat(result_str, buffer);
+            result_size++ ;
             
-        } else if (operator_allowed(buffer) == 1) {
-            stack += buffer;
+        } else if (operator_allowed(*buffer) == 1) {
+            strcat(stack, buffer);
             stack_top++ ;
+            
+            printf(".check: ");
+            for (int i = 0; i < stack_top; ++i) {
+                printf("%c\n", stack[i]);
+            }
             
             // pop -> push to res
-            
-        } else if (buffer == '(') {
-            stack += buffer; // ok, but how to remove?
-            stack_top++ ;
-            //printf("check: %s\n", stack[top]);
-
+        } else if (*buffer == '(') {
             bracket_deep++ ;
             
-        } else if (buffer == ')') {
+            strcat(stack, buffer);
+            stack_top++ ;
+            printf("check stack: %s\n", stack);
+            
+        } else if (*buffer == ')') {
             bracket_deep-- ;
             
             // in any case add Space and Buffer when pushing into result!
             
-            // pop all from the end untill (
+            // pop all from the end untill
             
-            while (buffer != '(') {
-                buffer = stack[stack_top];
+            while (*buffer != '(') {
+                memcpy(buffer, &stack[stack_top-- ], 1);
+                memcpy(reverse[rev_last++ ], buffer, 1);
                 
-                result_str += ' ' + buffer;
-                
-                if (stack_top == 0) {
+                printf("current buffer '%s', top: %zu\n", buffer, stack_top);
+                if (stack_top <= 0)
                     break;
-                } else {
-                    stack_top-- ;
+            }
+        } else if (*buffer == ' ') {
+            if (result_size > 0) {
+                //grow_buffer(reverse, rev_inited);
+                
+                if (rev_last > rev_inited) {
+                    char** buf = realloc(reverse, rev_inited*2);
+                    if (buf != NULL) {
+                        reverse = buf;
+                        rev_inited = rev_inited*2;
+                        
+                        // free mem - buf, rev
+                        for (int i = 0; i < rev_inited; ++i) {
+                            free(buf[i]);
+                        }
+                        free(buf);
+                    } else {
+                        for (int i = 0; i < rev_inited; ++i) {
+                            free(reverse[i]);
+                        }
+                        free(reverse);
+                        
+                        printf("[error] - no size for realloc");
+                        exit(0);
+                    }
                 }
                 
-                printf("current buffer '%c', top: %zu\n", buffer, stack_top);
+                reverse[rev_last] = (char* ) malloc(result_size);
+                memcpy(reverse[rev_last], result_str, result_size);
+                rev_last++ ;
+                
+                result_size = 0;
             }
-        }
-        else {
-            // wrong char!
-            printf("[error] - wrong char: '%c'", buffer);
+            
+        } else {
+            printf("[error] - wrong char: '%s'", buffer); // wrong char!
             exit(0);
         }
         
@@ -180,15 +231,22 @@ double create_rpn(char* exp, size_t len){
             printf("--wrong bracket expr!\n");
             exit(0);
         }
-        
         index++ ;
     }
     
     // present result
-    if (bracket_deep == 0)
+    if (bracket_deep == 0) {
         //return evaulate_rpn(stack, stack_top);
+        printf("\nout stack check:\n");
+        for (int i = 0; i < stack_top; ++i) {
+            printf("%c\n", stack[i]);
+        }
+        printf("\n\nout result str:\n");
+        for (int i = 0; i < rev_last; ++i) {
+            printf("%s\n", reverse[i]);
+        }
         return 0.0;
-    else {
+    } else {
         // wrong brackets
         printf("[error] - wrong brackets");
         exit(0);
@@ -196,7 +254,26 @@ double create_rpn(char* exp, size_t len){
 }
 
 
-int main(int argc, const char * argv[]) {
+int main(){
+    char* expression = "(10.3  +20.1 + 31)- 491.3"; // -> "10.3 20.1 + 31 + 491.3 -"
+    double result = create_rpn(expression, strlen(expression));
+    
+    // -- v1 func --
+    //char* test[] = {"1", "2", "+", "3", "4", "-", "+"}; // 2.00
+    //char* test[] = {"10.3", "2", "+", "3", "4", "+", "+"}; // 19.30
+    //char* test[] = {"11", "3", "9", "*", "+"}; // 38.00
+    //double result = evaulate_rpn(test, sizeof(test)/sizeof(char* ));
+    
+    // -- v2 func --
+    //char* test = "10.3 20.1 + 31 491.3 - +";
+    //double result = evaulate_rpn(test, sizeof(test));
+    
+    printf("%.2f\n", result);
+    return 0;
+}
+
+
+int main_rel() {
     char* expression = (char* ) malloc(MAX_LEN*sizeof(char));
     if (expression == NULL) {
         printf("[error]");
@@ -207,34 +284,29 @@ int main(int argc, const char * argv[]) {
         
         // switch to getch ???
         while (scanf("%c", &expression[len]) != -1) {
+            // save everything except spaces
             if (expression[len] != ' ') {
                 len++ ;
-                // save everything except spaces
             }
             // can add resizing later here!
         }
-        /*
-        printf("\ncheck input:\n");
-        for (int i = 0; i < len; ++i) {
-            printf("%c", expression[i]);
-        }
-        exit(0);
-        */
-        
-        //double result = create_rpn(expression, len);
-        
-        // -- v1 func --
-        //char* test[] = {"1", "2", "+", "3", "4", "-", "+"}; // 2.00
-        //char* test[] = {"10.3", "2", "+", "3", "4", "+", "+"}; // 19.30
-        //char* test[] = {"11", "3", "9", "*", "+"}; // 38.00
-        //double result = evaulate_rpn(test, sizeof(test)/sizeof(char* ));
+        double result = create_rpn(expression, len);
         
         // -- v2 func --
-        char* test = "10.3 20.1 + 31 491.3 - +";
-        double result = evaulate_rpn(test, sizeof(test));
+        //char* test = "10.3 20.1 + 31 491.3 - +";
+        //double result = evaulate_rpn(test, sizeof(test));
         
-        //printf("%.2f", result);
+        printf("%.2f", result);
         free(expression);
     }
     return 0;
+}
+
+
+void print_content(char* array, int size) {
+    printf("\ncheck input:\n");
+    for (int i = 0; i < size; ++i) {
+        printf("%c", array[i]);
+    }
+    exit(0);
 }
