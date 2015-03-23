@@ -143,7 +143,7 @@ size_t new_try(block* input, size_t ssize) {
 }
 
 
-int main(){
+int mainx(){
     int n = 0;
     std::cin >> n;
     
@@ -207,4 +207,16 @@ size_t find_max(block* input, int ssize){
         last_height = input[index].height;
     }
     return max;
+}
+
+
+
+#include <limits>
+
+int main(){
+                                                                // test6 ans = 2147170000
+    std::cout << std::numeric_limits<int>::max() << "\n";       // 2147483647
+    std::cout << std::numeric_limits<size_t>::max() << "\n";    // 18446744073709551615
+    
+    return 0;
 }
