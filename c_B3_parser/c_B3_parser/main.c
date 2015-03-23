@@ -23,6 +23,8 @@
 
 #define MAX_LEN 1024
 
+void print_content(char** , size_t);
+
 
 // needs to check priority
 size_t get_power(char op) {
@@ -42,7 +44,7 @@ size_t get_power(char op) {
 
 
 // check if current char is operator
-size_t operator_allowed(char op) {
+size_t is_operator(char op) {
     if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm')
         return 1;
     else
@@ -50,7 +52,7 @@ size_t operator_allowed(char op) {
 }
 
 
-size_t digit_allowed(char op) {
+size_t is_digit(char op) {
     if (op == '1' || op == '2' || op == '3' ||
         op == '4' || op == '5' || op == '6' ||
         op == '7' || op == '8' || op == '9' ||
@@ -115,18 +117,41 @@ double evaulate_rpn(char* exp, size_t len) {
 
 
 
-int grow_buffer(char** buffer, size_t current_size) {
+
+
+void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char* item, size_t size) {
+    // realloc
+    if (*used_lines >= *out_lines) {
+        *out_lines = (*out_lines) * 2;
+        char** buf = (char** ) realloc(*reverse, *out_lines);
+        
+        if (buf != NULL) {
+            *reverse = buf;
+        } else {
+            // free reverse !!!
+            
+            printf("[error] - no memory");
+            exit(0);
+        }
+    }
     
+    // save
+    char* buf_string = (char* ) malloc(size + 1);
+    memcpy(buf_string, item, size);
+    buf_string[size] = '\0';
     
+    *reverse[*used_lines] = (char* ) malloc(size);
+    strcpy(*reverse[*used_lines], buf_string);
     
-    return 1;
+    *used_lines += 1;
+    
+    free(buf_string);
 }
 
 
 
 
 // transform from Infix to Postfix notation
-
 double create_rpn(char* exp, size_t len){
     printf("got exp: %s, %zu chars\n\n", exp, len);
     
@@ -136,95 +161,106 @@ double create_rpn(char* exp, size_t len){
     char* stack = (char* ) malloc(len*sizeof(char));
     size_t stack_top = 0;  // position of last item in stack
     
-    // buffer string for saving postfix notation ?
-    char* result_str = (char* ) malloc(len*sizeof(char));
-    size_t result_size = 0;
-    
-    size_t rev_last = 0;
-    size_t rev_inited = 3;
-    char** reverse = (char** ) malloc(rev_inited*sizeof(char* )); // ready RPN!!!
+    // ready RPN!!!
+    size_t out_lines = 1;
+    size_t used_lines = 0;
+    char** reverse = (char** ) malloc(out_lines*sizeof(char* ));
     
     char* buffer = (char* ) malloc(1); // for one current char
     
+    int digit = 0;
+    size_t start_index = 0; // for parsing Long-Vals
+    
     size_t index = 0;
     while (index < len) {
-        //buffer = exp[index]; //printf("'%c', size = %zu\n", buffer, sizeof(buffer));
-        
+        // buffer constats only 1 char but it is a string
         memcpy(buffer, &exp[index], 1);
         printf("buffer = %s\n", buffer);
         
-        if (digit_allowed(*buffer) == 1) {
-            strcat(result_str, buffer);
-            result_size++ ;
-            
-        } else if (operator_allowed(*buffer) == 1) {
-            strcat(stack, buffer);
-            stack_top++ ;
-            
-            printf(".check: ");
-            for (int i = 0; i < stack_top; ++i) {
-                printf("%c\n", stack[i]);
+        if (is_digit(*buffer) == 1) {
+            // save first digit place
+            if (digit == 0) {
+                start_index = index;
+                digit = 1;
             }
+        } else {
             
-            // pop -> push to res
-        } else if (*buffer == '(') {
-            bracket_deep++ ;
-            
-            strcat(stack, buffer);
-            stack_top++ ;
-            printf("check stack: %s\n", stack);
-            
-        } else if (*buffer == ')') {
-            bracket_deep-- ;
-            
-            // in any case add Space and Buffer when pushing into result!
-            
-            // pop all from the end untill
-            
-            while (*buffer != '(') {
-                memcpy(buffer, &stack[stack_top-- ], 1);
-                memcpy(reverse[rev_last++ ], buffer, 1);
-                
-                printf("current buffer '%s', top: %zu\n", buffer, stack_top);
-                if (stack_top <= 0)
-                    break;
-            }
-        } else if (*buffer == ' ') {
-            if (result_size > 0) {
-                //grow_buffer(reverse, rev_inited);
-                
-                if (rev_last > rev_inited) {
-                    char** buf = realloc(reverse, rev_inited*2);
+            if (digit == 1) {
+                /*
+                if (used_lines >= out_lines) {
+                    out_lines *= 2;
+                    char** buf = (char** ) realloc(reverse, out_lines);
+                    
+                    
+                    
                     if (buf != NULL) {
                         reverse = buf;
-                        rev_inited = rev_inited*2;
-                        
-                        // free mem - buf, rev
-                        for (int i = 0; i < rev_inited; ++i) {
-                            free(buf[i]);
-                        }
-                        free(buf);
                     } else {
-                        for (int i = 0; i < rev_inited; ++i) {
-                            free(reverse[i]);
-                        }
-                        free(reverse);
+                        // free reverse !!!
                         
-                        printf("[error] - no size for realloc");
+                        printf("[error] - no memory");
                         exit(0);
                     }
                 }
                 
-                reverse[rev_last] = (char* ) malloc(result_size);
-                memcpy(reverse[rev_last], result_str, result_size);
-                rev_last++ ;
+                // save
+                size_t size = index - start_index; // size of str
+                char* buf_string = (char* ) malloc(size + 1);
+                memcpy(buf_string, exp + start_index, size);
+                buf_string[size] = '\0';
                 
-                result_size = 0;
+                reverse[used_lines] = (char* ) malloc(size);
+                strcpy(reverse[used_lines++ ], buf_string);
+                
+                free(buf_string);
+                */
+                
+                digit = 0;
+                
+                size_t size = index - start_index; // size of str
+                push_to_stack(&reverse, &out_lines, &used_lines, exp + start_index, size);
+                print_content(reverse, used_lines);
             }
             
-        } else {
-            printf("[error] - wrong char: '%s'", buffer); // wrong char!
-            exit(0);
+            
+            if (is_operator(*buffer) == 1) {
+                strcat(stack, buffer);
+                stack_top++ ;
+            
+                printf("stack now: ");
+                for (int i = 0; i < stack_top; ++i) {
+                    printf("%c", stack[i]);
+                }
+                printf("\n");
+            
+            // pop -> push to res
+            } else if (*buffer == '(') {
+                bracket_deep++ ;
+            
+                strcat(stack, buffer);
+                stack_top++ ;
+                printf("stack now 2: %s\n", stack);
+            
+            } else if (*buffer == ')') {
+                bracket_deep-- ;
+                
+                while (*buffer != '(') {
+                    //memcpy(buffer, &stack[stack_top-- ], 1);
+                    //memcpy(reverse[used_lines++ ], buffer, 1);  // dont forget to check alloc size
+                
+                    
+                    
+                    printf("current buffer '%s', top: %zu\n", buffer, stack_top);
+                    if (stack_top <= 0)
+                        break;
+                }
+            } else if (*buffer == ' ') {
+                // ignore it...
+            
+            } else {
+                printf("[error] - wrong char: '%s', %c\n", buffer, *buffer); // wrong char!
+                exit(0);
+            }
         }
         
         if (bracket_deep < 0) {
@@ -234,7 +270,7 @@ double create_rpn(char* exp, size_t len){
         index++ ;
     }
     
-    // present result
+    free(buffer);
     if (bracket_deep == 0) {
         //return evaulate_rpn(stack, stack_top);
         printf("\nout stack check:\n");
@@ -242,9 +278,10 @@ double create_rpn(char* exp, size_t len){
             printf("%c\n", stack[i]);
         }
         printf("\n\nout result str:\n");
-        for (int i = 0; i < rev_last; ++i) {
+        for (int i = 0; i < used_lines; ++i) {
             printf("%s\n", reverse[i]);
         }
+        
         return 0.0;
     } else {
         // wrong brackets
@@ -273,6 +310,15 @@ int main(){
 }
 
 
+// - OK!
+int test_atof(){
+    printf("%.2f\n", atof("123.")); // 123.00
+    printf("%.2f\n", atof(".123")); // 0.12
+    printf("%.2f\n", atof("."));    // 0.00
+    return 0;
+}
+
+
 int main_rel() {
     char* expression = (char* ) malloc(MAX_LEN*sizeof(char));
     if (expression == NULL) {
@@ -291,11 +337,6 @@ int main_rel() {
             // can add resizing later here!
         }
         double result = create_rpn(expression, len);
-        
-        // -- v2 func --
-        //char* test = "10.3 20.1 + 31 491.3 - +";
-        //double result = evaulate_rpn(test, sizeof(test));
-        
         printf("%.2f", result);
         free(expression);
     }
@@ -303,10 +344,10 @@ int main_rel() {
 }
 
 
-void print_content(char* array, int size) {
-    printf("\ncheck input:\n");
-    for (int i = 0; i < size; ++i) {
-        printf("%c", array[i]);
+void print_content(char** array, size_t size) {
+    printf("\nprint_content: ");
+    for (size_t i = 0; i < size; ++i) {
+        printf("%s ", array[i]);
     }
-    exit(0);
+    printf("\n");
 }
