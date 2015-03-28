@@ -53,7 +53,6 @@ public:
     block pop();
     bool isEmpty() const{ return realSize == 0; }
     void print_items();
-    //void grow();
     
 private:
     block* buffer;
@@ -61,23 +60,9 @@ private:
     size_t realSize;
 };
 
-/*
- void Stack::grow(){
-	int newBufferSize = bufferSize * 2;
-	int* newBuffer = new int[newBufferSize];
- 
-	memcpy(newBuffer, buffer, realSize);
- 
-	delete[] buffer;
-	buffer = newBuffer;
-	bufferSize = newBufferSize;
- }*/
 
 void Stack::push(block a){
     assert(realSize < bufferSize);
-//    if (realSize == bufferSize) {
-//        grow();
-//    }
     buffer[realSize++] = a;
 }
 
@@ -163,61 +148,9 @@ int main(){
 }
 
 
-///////// PROCESSOR /////////
-
-size_t find_max(block* input, int ssize){
-    long int max = 0;            // maximum square
-    long int buf_max = 0;        // bufferizy max for several blocks
-    
-    size_t last_height = 0;    // stores the height of last checked block
-    size_t buffer_wid = 0;     // bufferizy forms
-    size_t buffer_hig = 0;     // - . - . -
-    
-    for (int index = 0; index < ssize; ++index) {
-        // check SQ of every block
-        buffer_hig = input[index].height;
-        buffer_wid = input[index].width;
-        if (buffer_wid*buffer_hig > max) {
-            max = buffer_wid*buffer_hig;
-        }
-        
-        if (input[index].height < last_height) {
-            
-            // cut from (index - 1) - the first bigger block - OK
-            for (int k = index - 1; k >= 0; --k) {
-                //size_t comp1 = input[index].height; size_t comp2 = input[k].height;
-                if (input[index].height < input[k].height) {
-                    
-                    // do full Sq eval here: array [0; index) is sorted - OK
-                    for (int i = 0; i < index; ++i) {
-                        buf_max = 0;
-                        for (int l = i; l < index; ++l) {
-                            buf_max += input[i].height*input[l].width;
-                        }
-                        if (buf_max > max) {
-                            max = buf_max;
-                        }
-                    }
-                    //printf("height: %zu ", input[k].height);
-                    input[k].height = input[index].height;
-                    //printf("->  %zu; max now: %zu\n", input[k].height, max);
-                } else break;
-            }
-        }
-        last_height = input[index].height;
-    }
-    
-    if (max == 2424000000)
-        return 2428605000;
-    else
-        return max;
-}
-
-
 // correct = 2428605000
 
 // my sent = 2424000000
-
 
 #include <limits>
 

@@ -6,10 +6,11 @@
 //  Copyright (c) 2015 Kasatkin. All rights reserved.
 //
 
+#include <stdio.h>
 #include <iostream>
 #include <vector>
 
-
+/*
 struct CPoint {
     int x;
     int y;
@@ -43,7 +44,7 @@ void my_sort(T* arr, size_t l, size_t r, bool (*is_less)(const T&, const T&)) {
 }
 
 
-int main(){
+int main_sem(){
     
     std::vector <CPoint> arr;
     CPoint pt;
@@ -67,6 +68,42 @@ int main(){
     my_sort<CPoint>(&arr[0], 0, arr.size(), is_less_y);
     for (size_t i = 0; i < arr.size(); ++i) {
         std::cout << arr[i].x << " " << arr[i].y << " " << "\n";
+    }
+    
+    return 0;
+}
+*/
+
+// compare ints
+bool item_is_less(const int& l, const int& r) {
+    return l < r;
+}
+
+template <class T>
+
+void insertion_sort(T* a, size_t n, bool (*is_less)(const T&, const T&)) {
+    for (size_t i = 1; i < n; ++i) {
+        T tmp = a[i];
+        for (size_t j = i; j > 0 && is_less(tmp, a[j-1]); --j) {
+            a[j] = a[j-1];
+            a[j - 1] = tmp;
+        }
+    }
+}
+
+
+int main(){
+    std::vector <int> arr;
+    int buf = 0;
+    
+    while ( scanf("%d", &buf) == 1 ) {
+        arr.push_back(buf);
+    }
+    
+    insertion_sort<int>(&arr[0], arr.size(), item_is_less);
+    
+    for (size_t i = 0; i < arr.size(); ++i) {
+        std::cout << arr[i] << " ";
     }
     
     return 0;
