@@ -21,12 +21,21 @@ bool operator < (const CPoint& l, const CPoint& r) {
 }
 
 
+bool is_less_x (const CPoint& l, const CPoint& r) {
+    return l.x < r.x;
+}
+
+bool is_less_y (const CPoint& l, const CPoint& r) {
+    return l.y < r.y;
+}
+
+
 template <class T>
 
-void my_sort(T* arr, size_t l, size_t r) {
+void my_sort(T* arr, size_t l, size_t r, bool (*is_less)(const T&, const T&)) {
     for (size_t i = l; i < r; i++) {
         for (size_t j = l; j < r; j++) {
-            if (arr[j + 1] < arr[j]) {
+            if ( is_less(arr[j + 1], arr[j]) ) {
                 std::swap(arr[j], arr[j + 1]);
             }
         }
@@ -48,7 +57,14 @@ int main(){
 //    }
 //    std::cout << "\n";
     
-    my_sort<CPoint>(&arr[0], 0, arr.size());
+    my_sort<CPoint>(&arr[0], 0, arr.size(), is_less_x);
+    for (size_t i = 0; i < arr.size(); ++i) {
+        std::cout << arr[i].x << " " << arr[i].y << " " << "\n";
+    }
+    
+    std::cout << "\n--------\n";
+    
+    my_sort<CPoint>(&arr[0], 0, arr.size(), is_less_y);
     for (size_t i = 0; i < arr.size(); ++i) {
         std::cout << arr[i].x << " " << arr[i].y << " " << "\n";
     }
