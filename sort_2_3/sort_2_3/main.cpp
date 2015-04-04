@@ -36,12 +36,19 @@ bool item_is_less(const CPoint& L, const CPoint& R){
 }
 
 
-int get_sin(const CPoint& point) {
-    return (CPoint::baseX - point.x)/sqrt(CPoint::baseX*point.x + CPoint::baseY*point.y);
+double get_sin(const CPoint& point) {
+    if ( sqrt(CPoint::baseX*point.x + CPoint::baseY*point.y) > 0 ) {
+        return (CPoint::baseX - point.x)/sqrt(CPoint::baseX*point.x + CPoint::baseY*point.y);
+    } else {
+        return 0.0;
+    }
 }
 
 
 bool angle(const CPoint& L, const CPoint& R){
+    //std::cout << "Point1: " << L.x << " " << L.y << ", sin = " << get_sin(L) << "\n";
+    //std::cout << "Point2: " << R.x << " " << R.y << ", sin = " << get_sin(R) << "\n\n";
+    
     return get_sin(L) < get_sin(R);
 }
 
@@ -150,8 +157,8 @@ int main(){
         }
     }
     
-    std::cout << "Min: " << min.x << " " << min.y << "\n";
     CPoint::SetBase(min.x, min.y);
+    std::cout << "Min: " << CPoint::baseX << " " << CPoint::baseY << "\n";
     
     heap_sort<CPoint>(arr, n, angle);
     
@@ -163,75 +170,3 @@ int main(){
     delete [] arr;
     return 0;
 }
-
-
-/*
-// seminar 2, demo
-
-//2vn2-311d-e4am (caps) -- projector pass, Class_2
-// QuickSort
-// ( meeting iterators method )
-int partition(int* arr, int l, int r) {
-    
-    int pivot = arr[l];
-    int i = l + 1;
-    int j = r;
-    
-    
-//    for (;i < r; ++i) {
-//        if (arr[i] > pivot) {
-//            for (; j > i; --j) {
-//                if (arr[j] < pivot) {
-//                    std::swap(arr[l], arr[j]);
-//                }
-//            }
-//        }
-//    }
- 
-    
-    while (true) {
-        while (i <= r && arr[i] < pivot) {
-            i++;
-        }
-        while (arr[j] > pivot) {
-            j--;
-        }
-        if (i >= j) {
-            std::swap(arr[l], arr[j]);
-            return j;
-        }
-        std::swap(arr[i], arr[j]);
-        i++ ;
-        j-- ;
-    }
-}
-
-
-
-
-
-int findStats(int* arr, int l, int r, int k){
-    int pivotPos = partition(arr, l, k);
-    
-    if (pivotPos == k) {
-        return arr[k];
-    } else if (pivotPos < k ) {
-        return findStats(arr, pivotPos + 1, r, k);
-    } else {
-        return findStats(arr, l, pivotPos - 1, k);
-    }
-}
-
-
-int main(){
-    int n = 0;
-    int k = 0;
-    std::cin >> n >> k;
-    int* arr = new int [n];
-    for (int i = 0; i < n; ++i) {
-        std::cin >> arr[i];
-    }
-    std::cout << findStats(arr, 0, n-1, k);
-    delete [] arr;
-}
-*/
