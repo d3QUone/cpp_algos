@@ -33,7 +33,7 @@ bool item_is_less(const CPoint& L, const CPoint& R){
     }
 }
 
-
+// second round
 double get_sin(const CPoint& point) {
     if (CPoint::baseY - point.y != 0) {
         return atan((CPoint::baseX - point.x)/(CPoint::baseY - point.y));
@@ -44,17 +44,17 @@ double get_sin(const CPoint& point) {
 
 
 bool angle(const CPoint& L, const CPoint& R){
-    std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << L.x << " " << L.y << ", atan = " << get_sin(L) << "\n";
-    std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << R.x << " " << R.y << ", atan = " << get_sin(R) << "\n\n";
-    
+    //std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << L.x << " " << L.y << ", atan = " << get_sin(L) << "\n";
+    //std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << R.x << " " << R.y << ", atan = " << get_sin(R) << "\n\n";
     return get_sin(L) < get_sin(R);
 }
 
 
+// insert 'x' in heap
+// n - current heap size
 template <class T>
 void heap_insert(T* arr, int n, T x, bool (*is_less)(const T&, const T&)){
     arr[n+1] = x;
-    
     for (int i = n + 1; i > 1; --i) {
         if (is_less(arr[i/2], arr[i])) {
             std::swap(arr[i], arr[i/2]);
@@ -66,23 +66,60 @@ void heap_insert(T* arr, int n, T x, bool (*is_less)(const T&, const T&)){
 }
 
 
+
 template <class T>
 void heap_pop(T* arr, int n, bool (*is_less)(const T&, const T&)){
     std::swap(arr[n], arr[1]);
-    
     for (int i = 1; 2*i < n;) {
         i *= 2;
         if (i + 1 < n && is_less(arr[i], arr[i+1])) {
             i += 1;
         }
-        
         if (is_less(arr[i/2], arr[i])) {
             std::swap(arr[i/2], arr[i]);
         }
     }
 }
 
-/*
+
+template <class T>
+void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
+    T* buf = new T[n+1];
+    for (int i = 0; i < n; ++i) {
+        heap_insert(buf, i, arr[i], is_less);
+    }
+    for (int i = 0; i < n; ++i) {
+        arr[n-1-i] = buf[1];
+        heap_pop(buf, n-i, is_less);
+    }
+}
+
+
+/// fixing heap sort ///
+
+bool int_is_less(const int& L, const int& R){
+    return L < R;
+}
+
+int main(){
+    int n = 0;
+    int* arr = new int[n];
+    std::cin >> n;
+    for (int i = 0; i < n; ++i) {
+        std::cin >> arr[i];
+    }
+    
+    heap_sort<int>(arr, n, int_is_less);
+    for (int i = 0; i < n; ++i) {
+        std::cout << arr[i] << " ";
+    }
+    
+    return 0;
+}
+
+///////////////////////////
+
+
 template <class T>
 void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
     int k = 0;
@@ -102,9 +139,9 @@ void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
         }
     }
 }
-*/
 
-/*
+
+
 // issue with first item
 template <class T>
 void quick_heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
@@ -113,28 +150,12 @@ void quick_heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
         heap_pop(arr - 1, n, is_less);
     }
 }
-*/
 
 
-template <class T>
-void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
-    T* buf = new T[n+1];
-    for (int i = 0; i < n; ++i) {
-        heap_insert(buf, i, arr[i], is_less);
-        //std::cout << "i\n";
-    }
-    for (int i = 0; i < n; ++i) {
-        arr[n-1-i] = buf[1];
-        heap_pop(buf, n-i, is_less);
-        //std::cout << "j\n";
-    }
-}
+//template <class T>
+//void sift_down(T* arr, int k, int n, bool (*is_less)(const T&, const T&)) {}
 
-
-int main(){
-
-    // 1 - sort by point absolute pos
-    
+int main_p(){
     int n = 0;
     int min_point = 0;
     std::cin >> n;
