@@ -9,8 +9,6 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <vector>
-
 
 struct CPoint {
     int x;
@@ -37,17 +35,17 @@ bool item_is_less(const CPoint& L, const CPoint& R){
 
 
 double get_sin(const CPoint& point) {
-    if ( sqrt(CPoint::baseX*point.x + CPoint::baseY*point.y) > 0 ) {
-        return (CPoint::baseX - point.x)/sqrt(CPoint::baseX*point.x + CPoint::baseY*point.y);
+    if (CPoint::baseY - point.y != 0) {
+        return atan((CPoint::baseX - point.x)/(CPoint::baseY - point.y));
     } else {
-        return 0.0;
+        return sqrt(2)/2;
     }
 }
 
 
 bool angle(const CPoint& L, const CPoint& R){
-    //std::cout << "Point1: " << L.x << " " << L.y << ", sin = " << get_sin(L) << "\n";
-    //std::cout << "Point2: " << R.x << " " << R.y << ", sin = " << get_sin(R) << "\n\n";
+    std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << L.x << " " << L.y << ", atan = " << get_sin(L) << "\n";
+    std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << R.x << " " << R.y << ", atan = " << get_sin(R) << "\n\n";
     
     return get_sin(L) < get_sin(R);
 }
@@ -55,7 +53,6 @@ bool angle(const CPoint& L, const CPoint& R){
 
 template <class T>
 void heap_insert(T* arr, int n, T x, bool (*is_less)(const T&, const T&)){
-    
     arr[n+1] = x;
     
     for (int i = n + 1; i > 1; --i) {
@@ -71,7 +68,6 @@ void heap_insert(T* arr, int n, T x, bool (*is_less)(const T&, const T&)){
 
 template <class T>
 void heap_pop(T* arr, int n, bool (*is_less)(const T&, const T&)){
-    
     std::swap(arr[n], arr[1]);
     
     for (int i = 1; 2*i < n;) {
@@ -86,7 +82,7 @@ void heap_pop(T* arr, int n, bool (*is_less)(const T&, const T&)){
     }
 }
 
-
+/*
 template <class T>
 void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
     int k = 0;
@@ -106,7 +102,7 @@ void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
         }
     }
 }
-
+*/
 
 /*
 // issue with first item
@@ -122,14 +118,15 @@ void quick_heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
 
 template <class T>
 void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
-    
     T* buf = new T[n+1];
     for (int i = 0; i < n; ++i) {
         heap_insert(buf, i, arr[i], is_less);
+        //std::cout << "i\n";
     }
     for (int i = 0; i < n; ++i) {
         arr[n-1-i] = buf[1];
         heap_pop(buf, n-i, is_less);
+        //std::cout << "j\n";
     }
 }
 
@@ -139,34 +136,44 @@ int main(){
     // 1 - sort by point absolute pos
     
     int n = 0;
+    int min_point = 0;
     std::cin >> n;
-
     CPoint min;
     CPoint* arr = new CPoint[n];
     for (int i = 0; i < n; ++i) {
         std::cin >> arr[i].x >> arr[i].y;
-        
-        // get min point
         if (i == 0) {
-            min.x = arr[0].x;
-            min.y = arr[0].y;
+            min = arr[0];
         } else {
             if (item_is_less(arr[i], min)) {
                 min = arr[i];
+                min_point = i;
             }
         }
     }
     
+//    for (int i = 0; i < n; ++i) {
+//        std::cout << arr[i].x << " " << arr[i].y << "\n";
+//    } std::cout << "----\n";
+    
+    // delete dat base-point from sorting
     CPoint::SetBase(min.x, min.y);
-    std::cout << "Min: " << CPoint::baseX << " " << CPoint::baseY << "\n";
-    
-    heap_sort<CPoint>(arr, n, angle);
-    
-    std::cout << "Result:\n";
+    CPoint* new_arr = new CPoint[n-1];
+    int j = 0;
     for (int i = 0; i < n; ++i) {
-        std::cout << arr[i].x << " " << arr[i].y << "\n";
+        if (i != min_point) {
+            new_arr[j] = arr[i];
+            j++;
+        }
+    }
+    delete [] arr;
+    
+    heap_sort<CPoint>(new_arr, n-1, angle);
+    std::cout << CPoint::baseX << " " << CPoint::baseY << "\n";
+    for (int i = 0; i < n-1; ++i) {
+        std::cout << new_arr[i].x << " " << new_arr[i].y << "\n";
     }
     
-    delete [] arr;
+    delete [] new_arr;
     return 0;
 }
