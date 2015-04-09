@@ -44,8 +44,8 @@ double get_sin(const CPoint& point) {
 
 
 bool angle(const CPoint& L, const CPoint& R){
-    //std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << L.x << " " << L.y << ", atan = " << get_sin(L) << "\n";
-    //std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << R.x << " " << R.y << ", atan = " << get_sin(R) << "\n\n";
+    std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << L.x << " " << L.y << ", atan = " << get_sin(L) << "\n";
+    std::cout << CPoint::baseX << " " << CPoint::baseY << " -- " << R.x << " " << R.y << ", atan = " << get_sin(R) << "\n\n";
     return get_sin(L) < get_sin(R);
 }
 
@@ -104,10 +104,9 @@ void heap_pop(T* arr, int n, bool (*is_less)(const T&, const T&)){
 
 template <class T>
 void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
-    int k = 0;
     for (int i = n/2; i >= 1; --i) {
         for (int j = i; j <= n/2;) {
-            k = j*2;
+            int k = j*2;
             if (k + 1 <= n && is_less(arr[k], arr[k+1])) {
                 ++k;
             }
@@ -132,7 +131,7 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(
     for (int i = 0; i < n; ++i) {
         heap_insert(buf, i, arr[i], is_less);
         
-        std::cout << "Insert: ";
+        std::cout << "Insert: \n";
         present(buf, n+1);
     }
     for (int i = 0; i < n; ++i) {
@@ -144,21 +143,7 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(
         present(buf, n+1);
         present(arr, n);
     }
-}
-
-
-template <class T>
-void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
-    make_heap(arr, n, is_less); /// <- fix!
-    
-    T* buf = new T[n+1];
-    for (int i = 0; i < n; ++i) {
-        heap_insert(buf, i, arr[i], is_less);
-    }
-    for (int i = 0; i < n; ++i) {
-        arr[n-1-i] = buf[1];
-        heap_pop(buf, n-i, is_less);
-    }
+    delete [] buf;
 }
 
 
@@ -227,6 +212,8 @@ int main(){
         }
     }
     
+    present_s(arr, n);
+    
     // delete dat base-point from sorting
     CPoint::SetBase(min.x, min.y);
     CPoint* new_arr = new CPoint[n-1];
@@ -238,6 +225,8 @@ int main(){
         }
     }
     delete [] arr;
+    
+    present_s(new_arr, n-1);
     
     heap_sort<CPoint>(new_arr, n-1, angle, present_s);
     std::cout << CPoint::baseX << " " << CPoint::baseY << "\n";
