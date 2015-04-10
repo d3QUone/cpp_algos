@@ -25,8 +25,25 @@ int CPoint::baseX=0;
 int CPoint::baseY=0;
 
 
-////////////////////////////////comparing///////////////////////////////////////////////////
+////////////////////////////// printing ////////////////////////////////////////////////////
 
+void present_i(int* arr, int len) {
+    for (int i = 1; i < len + 2; ++i) {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << "\n\n";
+}
+
+
+void present_s(CPoint* arr, int len) {
+    for (int i = 0; i < len; ++i) {
+        std::cout << arr[i].x << " " << arr[i].y << "\n";
+    }
+    std::cout << "\n\n";
+}
+
+
+//////////////////////////////// comparing /////////////////////////////////////////////////
 
 // tests with one-dimensional array
 bool int_is_less(const int& L, const int& R){
@@ -58,25 +75,26 @@ bool angle(const CPoint& L, const CPoint& R){
     return get_sin(L) < get_sin(R);
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void present_i(int* arr, int n) {
+// testing heap_insert:
+int mainx(){
+    int n = 6;
+    int* arr = new int[n];
+    int test[] = {1, 4, 2, 5, 3, 4};
+    
     for (int i = 0; i < n; ++i) {
-        std::cout << arr[i] << " ";
+        heap_insert<int>(arr, i, test[i], int_is_less);
+        present_i(arr, i);
     }
-    std::cout << "\n";
+    delete [] arr;
+    return 0;
 }
 
 
-void present_s(CPoint* arr, int n) {
-    for (int i = 0; i < n; ++i) {
-        std::cout << arr[i].x << " " << arr[i].y << "\n";
-    }
-    std::cout << "\n";
-}
-
-
-int main(){
+// testing heap sort
+int mainxxxx(){
     int n = 0;
     int* arr = new int[n];
     std::cin >> n;
@@ -89,12 +107,14 @@ int main(){
     
     std::cout << "Result: ";
     present_i(arr, n);
+    delete [] arr;
     return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
 
-int mainxx(){
+/////////////////////////// test task //////////////////////////////////////////////////////
+
+int main(){
     int n = 0;
     int min_point = 0;
     std::cin >> n;
@@ -125,7 +145,7 @@ int mainxx(){
         }
     }
     delete [] arr;
-    present_s(new_arr, n-1);
+    //present_s(new_arr, n-1);
     
     heap_sort<CPoint>(new_arr, n-1, angle, present_s);
 

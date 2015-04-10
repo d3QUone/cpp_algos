@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Kasatkin. All rights reserved.
 //
 
+#include <iostream>
 #include <stdio.h>
 
 
@@ -26,16 +27,25 @@
  }
  */
 
-// insert 'x' in heap
-// n - current heap size
+// insert 'x' in heap, 'n' - current heap size
 template <class T>
-void heap_insert(T* arr, int n, T x, bool (*is_less)(const T&, const T&)){
+void heap_insert(T* arr, int n, T item, bool (*is_less)(const T&, const T&)){
     // insert
-    arr[n+1] = x;
+    arr[n+1] = item;
     
     // do sift-up
     for (int i = n + 1; i > 1; --i) {
-        if (is_less(arr[i/2], arr[i])) {
+        //int parent = i/2;
+        int left_child = (i/2 + 1);
+        int right_child = (i/2 + 2);
+        if (i == right_child && is_less(arr[right_child], arr[left_child])) {
+            std::swap(arr[right_child], arr[left_child]);
+        }
+        
+        std::cout << "i=" << i << " i/2=" << i/2 << "\n";
+        std::cout << "left=" << left_child << " right=" << right_child << "\n";
+        
+        if (is_less(arr[i], arr[i/2])) {
             std::swap(arr[i], arr[i/2]);
             i /= 2;
         } else {
@@ -82,8 +92,8 @@ void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
 
 template <class T>
 void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(T* arr, int n)) {
-    make_heap(arr, n, is_less); /// <- fix!
-    present(arr, n);
+    //make_heap(arr, n, is_less); /// <- fix!
+    //present(arr, n);
     
     T* buf = new T[n+1];
     for (int i = 0; i < n; ++i) {
