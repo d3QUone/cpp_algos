@@ -109,9 +109,10 @@ int maccin(){
 // testing heap sort
 int main(){
     int n = 9;
-    int arr[] = {1, 4, 2, 5, 3, 4, 0, 2, 1};
+    int arr[] = {1, 4, 5, 0, 3, 4, 2, 2, 1}; // n =9
+    //int arr[] = {10, 11, 1, 3}; // n = 4
     
-    heap_sort<int>(arr, n, int_is_less, present_i);
+    heap_sort<int>(arr, n, int_is_less); //present_i
     //quick_heap_sort<int>(arr, n, int_is_less);
     
     std::cout << "Result: ";
