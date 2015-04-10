@@ -104,7 +104,6 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(
         arr[i] = buf[1];
         heap_pop(buf, n-i, is_less);
         
-        std::cout << "Pop " << arr[n-1-i] << " -> " << n-i-1 << "\n";
         std::cout << "Pop\n";
         present(buf, 1, n+1-i);
         present(arr, 0, n);
