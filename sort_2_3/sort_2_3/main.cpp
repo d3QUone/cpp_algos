@@ -78,7 +78,7 @@ bool angle(const CPoint& L, const CPoint& R){
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-int main(){
+int maccin(){
     int n = 5;
     int* arr = new int[n+1];
     //int test[] = {1, 4, 2, 5, 3, 4}; // sorted: 1 2 3 4 4 5
@@ -107,9 +107,9 @@ int main(){
 
 
 // testing heap sort
-int maincc(){
-    int n = 6;
-    int arr[] = {1, 4, 2, 5, 3, 4};
+int main(){
+    int n = 9;
+    int arr[] = {1, 4, 2, 5, 3, 4, 0, 2, 1};
     
     heap_sort<int>(arr, n, int_is_less, present_i);
     //quick_heap_sort<int>(arr, n, int_is_less);

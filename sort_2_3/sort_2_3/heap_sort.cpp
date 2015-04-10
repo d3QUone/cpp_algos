@@ -10,23 +10,6 @@
 #include <stdio.h>
 
 
-/*
- template <class T>
- void sift_up(T* arr, int len, bool (*is_less)(const T&, const T&)){
- 
- }
- 
- template <class T>
- void sift_down(T* arr, int len, bool (*is_less)(const T&, const T&)){
- 
- }
- 
- template <class T>
- void sort(T* arr, int len, bool (*is_less)(const T&, const T&)){
- 
- }
- */
-
 // insert 'x' in heap, 'n' - current heap size
 template <class T>
 void heap_insert(T* arr, int n, T item, bool (*is_less)(const T&, const T&)){
@@ -58,18 +41,24 @@ void heap_insert(T* arr, int n, T item, bool (*is_less)(const T&, const T&)){
 template <class T>
 void heap_pop(T* arr, int n, bool (*is_less)(const T&, const T&)){
     std::swap(arr[1], arr[n]); // top item is out
+
+    // i = 1 - base parent, sift down now
     for (int i = 1; 2*i < n;) {
+        int max_child = 2*i; // first it is left_child
+        if (max_child + 1 < n && is_less(arr[max_child + 1], arr[max_child])){
+            max_child++ ;
+        }
+        
+        //std::cout << "max_child on " << max_child << " = " << arr[max_child] << "\n";
+        if (is_less(arr[max_child], arr[i])) {
+            std::swap(arr[i], arr[max_child]);
+        }
         i *= 2;
-        if (i + 1 < n && is_less(arr[i], arr[i+1])) {
-            i += 1;
-        }
-        if (is_less(arr[i/2], arr[i])) {
-            std::swap(arr[i/2], arr[i]);
-        }
     }
 }
 
-
+/*
+// is not tested yet
 template <class T>
 void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
     for (int i = n/2; i >= 1; --i) {
@@ -89,12 +78,19 @@ void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
     }
 }
 
+ 
+template <class T>
+void quick_heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
+    make_heap(arr - 1, n, is_less);
+    for (int i = 0; i < n; ++i) {
+        heap_pop(arr - 1, n, is_less);
+    }
+}
+*/
+
 
 template <class T>
-void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(T* arr, int start, int stop)) {
-    //make_heap(arr, n, is_less); /// <- fix!
-    //present(arr, n);
-    
+void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(T* arr, int start, int stop)){
     T* buf = new T[n+1];
     for (int i = 0; i < n; ++i) {
         heap_insert(buf, i, arr[i], is_less);
@@ -104,11 +100,11 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(
     }
     std::cout << "//////////////////////////////////////////////\n\n";
     for (int i = 0; i < n; ++i) {
-        arr[n-1-i] = buf[1];
+        arr[i] = buf[1];
         heap_pop(buf, n-i, is_less);
         
         std::cout << "Pop " << arr[n-1-i] << " -> " << n-i-1 << "\n";
-        //std::cout << "Pop\n";
+        std::cout << "Pop\n";
         present(buf, 1, n+1-i);
         present(arr, 0, n);
     }
@@ -116,53 +112,16 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
+// release
 template <class T>
-void quick_heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)) {
-    make_heap(arr - 1, n, is_less);
+void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)){
+    T* buf = new T[n+1];
     for (int i = 0; i < n; ++i) {
-        heap_pop(arr - 1, n, is_less);
+        heap_insert(buf, i, arr[i], is_less);
     }
-}
-
-
-////////////////////////new sorting/////////////////////////////////////////////////////////
-
-
-template <class T>
-void max_heapify(T a[], int size, int i) {
-    int left =  (i + 1) * 2 - 1;
-    int right = (i + 1) * 2;
-    int largest = i;
-    if (left < size && a[left] > a[largest])
-        largest = left;
-    if (right < size && a[right] > a[largest])
-        largest = right;
-    if (largest != i) {
-        std::swap(a[i], a[largest]);
-        
-        max_heapify(a, size, largest); // <- fuck this
-    
+    for (int i = 0; i < n; ++i) {
+        arr[i] = buf[1];
+        heap_pop(buf, n-i, is_less);
     }
+    delete [] buf;
 }
-
-template <class T>
-void build_max_heap(T a[], int size) {
-    for (int i = size / 2; i >= 0; i--) {
-        max_heapify(a, size, i);
-    }
-}
-
-template <class T>
-void heapsort(T a[], int size) {
-    build_max_heap(a, size);
-    int heap_size = size;
-    for (int i = size-1; i > 0; i--) {
-        std::swap(a[0], a[i]);
-        heap_size--;
-        max_heapify(a, heap_size, 0);
-    }
-}
-
