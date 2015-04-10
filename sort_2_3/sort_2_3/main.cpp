@@ -27,16 +27,16 @@ int CPoint::baseY=0;
 
 ////////////////////////////// printing ////////////////////////////////////////////////////
 
-void present_i(int* arr, int len) {
-    for (int i = 1; i < len + 2; ++i) {
+void present_i(int* arr, int start, int stop) {
+    for (int i = start; i < stop; ++i) {
         std::cout << arr[i] << " ";
     }
     std::cout << "\n\n";
 }
 
 
-void present_s(CPoint* arr, int len) {
-    for (int i = 0; i < len; ++i) {
+void present_s(CPoint* arr, int start, int stop) {
+    for (int i = start; i < stop; ++i) {
         std::cout << arr[i].x << " " << arr[i].y << "\n";
     }
     std::cout << "\n\n";
@@ -78,43 +78,51 @@ bool angle(const CPoint& L, const CPoint& R){
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// testing heap_insert:
-int mainx(){
-    int n = 6;
-    int* arr = new int[n];
-    int test[] = {1, 4, 2, 5, 3, 4};
+int main(){
+    int n = 5;
+    int* arr = new int[n+1];
+    //int test[] = {1, 4, 2, 5, 3, 4}; // sorted: 1 2 3 4 4 5
+    int test[] = {1, 5, 3, 4, 2}; // sorted: 1 2 3 4 5
+    //int res[n];
     
+    // testing heap_insert:
     for (int i = 0; i < n; ++i) {
         heap_insert<int>(arr, i, test[i], int_is_less);
-        present_i(arr, i);
+        present_i(arr, 1, i+2);
     }
+    
+    std::cout << "Testing heap pop:\n\n";
+    for (int i = 0; i < n; ++i) {
+        //res[i] = arr[n-i];
+        
+        heap_pop<int>(arr, n-i, int_is_less);
+        present_i(arr, 1, n+1);
+    }
+    //std::cout << "Result: ";
+    //present_i(res, 0, n);
+    
     delete [] arr;
     return 0;
 }
 
 
 // testing heap sort
-int mainxxxx(){
-    int n = 0;
-    int* arr = new int[n];
-    std::cin >> n;
-    for (int i = 0; i < n; ++i) {
-        std::cin >> arr[i];
-    }
+int maincc(){
+    int n = 6;
+    int arr[] = {1, 4, 2, 5, 3, 4};
     
     heap_sort<int>(arr, n, int_is_less, present_i);
     //quick_heap_sort<int>(arr, n, int_is_less);
     
     std::cout << "Result: ";
-    present_i(arr, n);
-    delete [] arr;
+    present_i(arr, 0, n);
     return 0;
 }
 
 
 /////////////////////////// test task //////////////////////////////////////////////////////
-
-int main(){
+/*
+int mainxxx(){
     int n = 0;
     int min_point = 0;
     std::cin >> n;
@@ -131,8 +139,7 @@ int main(){
             }
         }
     }
-    
-    present_s(arr, n);
+    present_s(arr, 0, n);
     
     // delete dat base-point from sorting
     CPoint::SetBase(min.x, min.y);
@@ -145,12 +152,13 @@ int main(){
         }
     }
     delete [] arr;
-    //present_s(new_arr, n-1);
+    present_s(new_arr, 0, n-1);
     
     heap_sort<CPoint>(new_arr, n-1, angle, present_s);
 
     std::cout << CPoint::baseX << " " << CPoint::baseY << "\n";
-    present_s(new_arr, n-1);
+    present_s(new_arr, 0, n-1);
     delete [] new_arr;
     return 0;
 }
+*/

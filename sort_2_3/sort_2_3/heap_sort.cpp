@@ -57,7 +57,7 @@ void heap_insert(T* arr, int n, T item, bool (*is_less)(const T&, const T&)){
 
 template <class T>
 void heap_pop(T* arr, int n, bool (*is_less)(const T&, const T&)){
-    std::swap(arr[n], arr[1]);
+    std::swap(arr[1], arr[n]); // top item is out
     for (int i = 1; 2*i < n;) {
         i *= 2;
         if (i + 1 < n && is_less(arr[i], arr[i+1])) {
@@ -91,7 +91,7 @@ void make_heap(T* arr, int n, bool (*is_less)(const T&, const T&)) {
 
 
 template <class T>
-void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(T* arr, int n)) {
+void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(T* arr, int start, int stop)) {
     //make_heap(arr, n, is_less); /// <- fix!
     //present(arr, n);
     
@@ -100,16 +100,17 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(
         heap_insert(buf, i, arr[i], is_less);
         
         std::cout << "Insert: \n";
-        present(buf, n+1);
+        present(buf, 1, i+2);
     }
+    std::cout << "//////////////////////////////////////////////\n\n";
     for (int i = 0; i < n; ++i) {
         arr[n-1-i] = buf[1];
         heap_pop(buf, n-i, is_less);
         
-        //std::cout << "\nPop " << arr[n-1-i] << " -> " << n-i-1 << "\n";
-        std::cout << "\nPop\n";
-        present(buf, n+1);
-        present(arr, n);
+        std::cout << "Pop " << arr[n-1-i] << " -> " << n-i-1 << "\n";
+        //std::cout << "Pop\n";
+        present(buf, 1, n+1-i);
+        present(arr, 0, n);
     }
     delete [] buf;
 }
