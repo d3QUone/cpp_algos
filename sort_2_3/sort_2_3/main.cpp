@@ -77,6 +77,30 @@ void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&)){
 }
 
 
+template <class T>
+void heap_sort(T* arr, int n, bool (*is_less)(const T&, const T&), void present(T* arr, int start, int stop)){
+    T* buf = new T[n+1];
+    for (int i = 0; i < n; ++i) {
+        heap_insert(buf, i, arr[i], is_less);
+        
+        std::cout << "Insert: \n";
+        present(buf, 1, i+2);
+    }
+    std::cout << "//////////////////////////////////////////////\n\n";
+    for (int i = 0; i < n; ++i) {
+        arr[i] = buf[1];
+        heap_pop(buf, n-i, is_less);
+        
+        std::cout << "Pop\n";
+        present(buf, 1, n+1-i);
+        present(arr, 0, n);
+    }
+    delete [] buf;
+}
+
+
+
+
 
 struct CPoint {
     int x;
@@ -106,7 +130,7 @@ void present_s(CPoint* arr, int start, int stop) {
     for (int i = start; i < stop; ++i) {
         std::cout << arr[i].x << " " << arr[i].y << "\n";
     }
-    std::cout << "\n\n";
+    //std::cout << "\n\n";
 }
 
 
@@ -129,9 +153,12 @@ bool item_is_less(const CPoint& L, const CPoint& R){
 // second round
 double get_sin(const CPoint& point) {
     if (CPoint::baseY - point.y != 0) {
-        return atan((CPoint::baseX - point.x)/(CPoint::baseY - point.y));
+        if (point.y > 0)
+            return atan(1.0*(CPoint::baseX - point.x)/(CPoint::baseY - point.y))*180/M_PI;
+        else
+            return -1.0*atan(1.0*(CPoint::baseX - point.x)/(CPoint::baseY - point.y))*180/M_PI + 90;
     } else {
-        return M_PI/2;
+        return 90; //M_PI/2;
     }
 }
 
