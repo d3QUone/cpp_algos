@@ -77,25 +77,24 @@ int main(){
     /// 2 - sort it
     ///
     merge_sort<Dot>(input, 2*n, is_less);
+    
 //    for (int i = 0; i < 2*n; ++i) {
 //        std::cout << input[i].x << " flag=" << input[i].flag << "\n";
 //    }
     
     /// 3 - solve the task
     ///
-    int thin = 0; int delta = 0;
+    int thin = 0;
     int len = 0;
     for (int i = 0; i < 2*n; ++i) {
         if (input[i].flag) {
-            delta = 1;
             thin++;
         } else {
-            delta = -1;
             thin--;
         }
-        
-        if ((thin == 2 && delta == 1) || (thin == 0 && delta == -1)) {
+        if ((thin == 2 && input[i].flag == true) || (thin == 0 && input[i].flag == false)) {
             len += (input[i].x - input[i-1].x);
+            
             //std::cout << "added " << input[i-1].x << "-" << input[i].x << "\n";
         }
     }
