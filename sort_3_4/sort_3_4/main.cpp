@@ -16,26 +16,8 @@ struct Dot {
 
 
 bool is_less(const Dot& L, const Dot& R) {
-    if (L.flag == R.flag) {
-        return L.x < R.x;
-    } else {
-        return L.flag;
-        
-//        // the same...
-//        if (L.flag == true) {
-//            return true;
-//        } else {
-//            return false;
-//        }
-        
-    }
+    return L.x < R.x;
 }
-
-
-// for merge-sort test
-//bool is_less(const Dot& L, const Dot& R) {
-//    return L.x < R.x;
-//}
 
 
 template <class T>
@@ -81,19 +63,45 @@ void merge_sort(T* arr, int len, bool (*is_less)(const T&, const T&)) {
 
 
 int main(){
+    
+    /// 1 - get input data
+    ///
     int n = 0;
     std::cin >> n;
     Dot* input = new Dot[2*n];
     for (int i = 0; i < n; ++i) {
         std::cin >> input[2*i].x >> input[2*i + 1].x;
         input[2*i].flag = true;         // start-point
-        //input[2*i + 1].flag = false;    // end-point
     }
     
+    /// 2 - sort it
+    ///
     merge_sort<Dot>(input, 2*n, is_less);
+//    for (int i = 0; i < 2*n; ++i) {
+//        std::cout << input[i].x << " flag=" << input[i].flag << "\n";
+//    }
     
+    /// 3 - solve the task
+    ///
+    int thin = 0; int delta = 0;
+    int len = 0;
     for (int i = 0; i < 2*n; ++i) {
-        std::cout << input[i].x << " ";
+        if (input[i].flag) {
+            delta = 1;
+            thin++;
+        } else {
+            delta = -1;
+            thin--;
+        }
+        
+        if ((thin == 2 && delta == 1) || (thin == 0 && delta == -1)) {
+            len += (input[i].x - input[i-1].x);
+            //std::cout << "added " << input[i-1].x << "-" << input[i].x << "\n";
+        }
     }
+    
+    /// 4 - present results
+    ///
+    std::cout << len;
     return 0;
 }
