@@ -19,3 +19,5 @@ main2.cpp
 sort_2_3.xccheckout
 *.xcscheme
 *.xccheckout
+*.pbxproj
+*.xcworkspacedata
