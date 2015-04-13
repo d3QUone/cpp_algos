@@ -13,9 +13,6 @@ bool compare_ints(const int& L, const int& R) {
     return L < R;
 }
 
-// реализовать стратегию выбора опорного элемента "медиана трех"
-// (ср арифметического от первого, центрального и последнего эл-тов)
-
 /*
  // issues with placing
 template <class T>
@@ -23,7 +20,6 @@ T median_of_three(T* a0, T* a1, T* a2, bool (*is_less)(const T&, const T&)){
     if (is_less(*a2, *a0)) {
         std::swap(*a2, *a0);
     }
-    
     if (is_less(*a2, *a1)) {
         std::swap(*a2, *a1);
         return *a2;
@@ -40,7 +36,8 @@ T median_of_three(T* a0, T* a1, T* a2, bool (*is_less)(const T&, const T&)){
 
 template <class T>
 T median_of_three(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
-    int cntr = (r - l)/2;
+    int cntr = (r - l + 1)/2;
+    //std::cout << "cntr=" << cntr << "\n";
     if (is_less(arr[r], arr[l])) {
         std::swap(arr[r], arr[l]);
     }
@@ -50,50 +47,57 @@ T median_of_three(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
     if (is_less(arr[r], arr[cntr])) {
         std::swap(arr[r], arr[cntr]);
     }
-    std::swap(arr[cntr], arr[r-1]);
-    return arr[r-1];
+    std::swap(arr[cntr], arr[r]);
+    return arr[r];
 }
 
 
 // returns an index
 template <class T>
 int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
+    std::cout << "\nInput:\n";
+    for (int a = l; a <= r; ++a) {
+        std::cout << arr[a] << " ";
+    } std::cout << "\n";
+    
     
     T pivot = median_of_three<T>(arr, l, r, is_less);
+    //std::cout << "pvt=" << pivot << " (l=" << l << ", r=" << r << ")\n";
     std::cout << "pvt=" << pivot << "\n";
     
     int i = l;
     int j = l + 1;
-    int base_index = r - 1;
+    int pivot_index = r;
     
     //std::cout << "itm: " << arr[l] << " " << arr[base_index] << " " << arr[r] << "\n";
     //std::cout << "ind: " << l << " " << base_index << " " << r << "\n";
     
-    /*
-    while (j < base_index && i < base_index) {
+    while (j < pivot_index) {
         if (is_less(pivot, arr[j])) {
             j++ ;
         } else {
-            std::swap(arr[i++ ], arr[j++ ]);
-//            std::swap(arr[i], )
+            std::swap(arr[++i ], arr[j++ ]); // v1
+            
+//            std::swap(arr[j++ ], arr[base_index]); // v2
+//            base_index = j;
         }
         
+        // just print it
         for (int a = l; a <= r; ++a) {
             std::cout << arr[a] << " ";
         } std::cout << "\n";
-    }*/
-    
-    while (is_less(pivot, arr[j]) && j < base_index) {
-        j++ ;
     }
     
-    while (is_less(arr[j], pivot) && j < base_index) {
-        std::swap(arr[i++ ], arr[j++ ]);
-        
-//        for (int a = l; a <= r; ++a) {
-//            std::cout << arr[a] << " ";
-//        } std::cout << "\n";
+    if (i + 1 < r) {
+        i++ ;
+        std::swap(arr[pivot_index], arr[i]);
     }
+    
+    // just print it
+    //std::cout << "Last swap:\n";
+    for (int a = l; a <= r; ++a) {
+        std::cout << arr[a] << " ";
+    } std::cout << "\n";
     
     return i;
 }
@@ -105,6 +109,7 @@ T find_K_stat(T* array, int asize, int k, bool (*is_less)(const T&, const T&)) {
     int r = asize - 1;
     while (true) {
         int index = partition(array, l, r, is_less);
+        std::cout << "~index=" << index << "\n";
         if (index == k) {
             return array[k];
         } else if (k < index) {
@@ -152,11 +157,15 @@ void find_stats(T* array, int asize, bool (*is_less)(const T&, const T&)){
 
 
 int main() {
-    int n = 8;
-    int array[] = {2, 8, 7, 1, 3, 26, 5, 40};
-    int correct[] = {1, 2, 3, 5, 7, 8, 26, 40};
-    
+//    int n = 8;
+//    int array[] = {2, 8, 7, 1, 3, 26, 5, 40};
+//    int correct[] = {1, 2, 3, 5, 7, 8, 26, 40};
+
+    int n = 10;
     for (int k = 0; k < n; k++) {
+        
+        int array[] = {3, 10, 5, 2, 1, 8, 13, 6, 9, 11};
+        int correct[] = {1, 2, 3, 5, 6, 8, 9, 10, 11, 13};
         
         int res = find_K_stat<int>(array, n, k, compare_ints);
         std::cout << "K(" << k << ")=" << res;
@@ -174,7 +183,7 @@ int main() {
     return 0;
 }
 
-
+/*
 int maixvcxn(){
     int t[8] = {2, 8, 7, 1, 3, 26, 5, 40};;
     std::cout << median_of_three<int>(t, 0, 7, compare_ints) << "\n";
@@ -196,4 +205,4 @@ int release() {
     }
     
     return 0;
-}
+}*/
