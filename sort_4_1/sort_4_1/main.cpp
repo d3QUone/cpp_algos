@@ -13,31 +13,11 @@ bool compare_ints(const int& L, const int& R) {
     return L < R;
 }
 
-/*
- // issues with placing
-template <class T>
-T median_of_three(T* a0, T* a1, T* a2, bool (*is_less)(const T&, const T&)){
-    if (is_less(*a2, *a0)) {
-        std::swap(*a2, *a0);
-    }
-    if (is_less(*a2, *a1)) {
-        std::swap(*a2, *a1);
-        return *a2;
-    } else {
-        if (is_less(*a0, *a1)) {
-            return *a1;
-        } else {
-            std::swap(*a0, *a1);
-            return *a0;
-        }
-    }
-}*/
-
 
 template <class T>
 T median_of_three(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
-    int cntr = (r - l + 1)/2;
-    //std::cout << "cntr=" << cntr << "\n";
+    int cntr = (r + l + 1)/2; // <- FUCK YEA!!!
+    ///std::cout << "cntr=" << cntr << "\n";
     if (is_less(arr[r], arr[l])) {
         std::swap(arr[r], arr[l]);
     }
@@ -55,15 +35,14 @@ T median_of_three(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
 // returns an index
 template <class T>
 int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
-    std::cout << "\nInput:\n";
-    for (int a = l; a <= r; ++a) {
-        std::cout << arr[a] << " ";
-    } std::cout << "\n";
+//    std::cout << "\nInput:\n";
+//    for (int a = l; a <= r; ++a) {
+//        std::cout << arr[a] << " ";
+//    } std::cout << "\n";
     
     
     T pivot = median_of_three<T>(arr, l, r, is_less);
-    //std::cout << "pvt=" << pivot << " (l=" << l << ", r=" << r << ")\n";
-    std::cout << "pvt=" << pivot << "\n";
+    //std::cout << "pvt=" << pivot << "\n";
     
     int i = l;
     int j = l + 1;
@@ -83,9 +62,9 @@ int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
         }
         
         // just print it
-        for (int a = l; a <= r; ++a) {
-            std::cout << arr[a] << " ";
-        } std::cout << "\n";
+//        for (int a = l; a <= r; ++a) {
+//            std::cout << arr[a] << " ";
+//        } std::cout << "\n";
     }
     
     if (i + 1 < r) {
@@ -95,9 +74,9 @@ int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
     
     // just print it
     //std::cout << "Last swap:\n";
-    for (int a = l; a <= r; ++a) {
-        std::cout << arr[a] << " ";
-    } std::cout << "\n";
+//    for (int a = l; a <= r; ++a) {
+//        std::cout << arr[a] << " ";
+//    } std::cout << "\n";
     
     return i;
 }
@@ -109,7 +88,7 @@ T find_K_stat(T* array, int asize, int k, bool (*is_less)(const T&, const T&)) {
     int r = asize - 1;
     while (true) {
         int index = partition(array, l, r, is_less);
-        std::cout << "~index=" << index << "\n";
+        //std::cout << "~index=" << index << "\n";
         if (index == k) {
             return array[k];
         } else if (k < index) {
@@ -121,42 +100,8 @@ T find_K_stat(T* array, int asize, int k, bool (*is_less)(const T&, const T&)) {
 }
 
 
-/*
-template <class T>
-void find_stats(T* array, int asize, bool (*is_less)(const T&, const T&)){
-    int base_index = asize/2; // base item will be here
-    T base = median_of_three(&array[0], &array[base_index], &array[asize-1], is_less);
-    std::cout << "Base = " << base << "\n\n";
-    
-    std::swap(array[asize-1], array[base_index]);
-    base_index = asize - 1;
-    
-    int i = 0; // points to the begining of sorted group
-    int j = 1; // points to the next item
-    for (; i < base_index && j < base_index;) {
-        std::cout << "i=" << i << ", j=" << j << " arr[j]=" << array[j] << "\n";
-        if (array[j] > array[base_index]) {
-            j++ ;
-        } else {
-            i++ ;
-            
-            std::cout << "swap " << array[i] << " " << array[j] << "\n";
-            std::swap(array[i], array[j++ ]);
-        }
-        
-        
-        for (int x = 0; x < asize; ++x) {
-            std::cout << array[x] << " ";
-        } std::cout << "\n\n";
-    }
-    
-    // last step..
-    std::swap(array[base_index], array[++i]);
-}
-*/
 
-
-int main() {
+int main_test() {
 //    int n = 8;
 //    int array[] = {2, 8, 7, 1, 3, 26, 5, 40};
 //    int correct[] = {1, 2, 3, 5, 7, 8, 26, 40};
@@ -193,9 +138,9 @@ int maixvcxn(){
     }
     return 0;
 }
+*/
 
-
-int release() {
+int main() {
     int n = 0;
     int k = 0;
     std::cin >> n >> k;
@@ -203,6 +148,6 @@ int release() {
     for (int i = 0; i < n; ++i) {
         std::cin >> array[i];
     }
-    
+    std::cout << find_K_stat<int>(array, n, k, compare_ints);
     return 0;
-}*/
+}
