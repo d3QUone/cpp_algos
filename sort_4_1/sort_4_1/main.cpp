@@ -60,7 +60,7 @@ template <class T>
 int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
     
     T pivot = median_of_three<T>(arr, l, r, is_less);
-    std::cout << "\npvt=" << pivot << "\n";
+    std::cout << "pvt=" << pivot << "\n";
     
     int i = l;
     int j = l + 1;
@@ -90,9 +90,9 @@ int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
     while (is_less(arr[j], pivot) && j < base_index) {
         std::swap(arr[i++ ], arr[j++ ]);
         
-        for (int a = l; a <= r; ++a) {
-            std::cout << arr[a] << " ";
-        } std::cout << "\n";
+//        for (int a = l; a <= r; ++a) {
+//            std::cout << arr[a] << " ";
+//        } std::cout << "\n";
     }
     
     return i;
@@ -152,28 +152,24 @@ void find_stats(T* array, int asize, bool (*is_less)(const T&, const T&)){
 
 
 int main() {
-    //int k = 2;
     int n = 8;
-    int array[] = {2, 8, 7, 1, 3, 26, 5, 40}; // 1 2 3 5 7 8 26 40
-    
-//    std::cin >> k;
-    // - in release
-    
-//    std::cin >> n;
-//    int* array = new int[n];
-//    for (int i = 0; i < n; ++i) {
-//        std::cin >> array[i];
-//    }
-    
+    int array[] = {2, 8, 7, 1, 3, 26, 5, 40};
+    int correct[] = {1, 2, 3, 5, 7, 8, 26, 40};
     
     for (int k = 0; k < n; k++) {
         
         int res = find_K_stat<int>(array, n, k, compare_ints);
+        std::cout << "K(" << k << ")=" << res;
+
+        if (res != correct[k]) {
+            std::cout << ", INCORRECT -> K(" << k << ")=" << correct[k];
+        }
+        std::cout << "\n";
         
-        std::cout << "\nK(" << k << ")=" << res << "\nFinally: ";
+        std::cout << "Processed arr: ";
         for (int i = 0; i < n; ++i) {
             std::cout << array[i] << " ";
-        } std::cout << "\n";
+        } std::cout << "\n-------------------------------------\n";
     }
     return 0;
 }
@@ -186,5 +182,18 @@ int maixvcxn(){
     for (int i = 0; i < 8; ++i) {
         std::cout << t[i] << " ";
     }
+    return 0;
+}
+
+
+int release() {
+    int n = 0;
+    int k = 0;
+    std::cin >> n >> k;
+    int* array = new int[n];
+    for (int i = 0; i < n; ++i) {
+        std::cin >> array[i];
+    }
+    
     return 0;
 }
