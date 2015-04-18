@@ -8,6 +8,14 @@
 
 #include <iostream>
 
+/*
+
+ 3_4. Закраска прямой 2.
+ На числовой прямой окрасили ​N​отрезков. 
+ Известны координаты левого и правого концов каждого отрезка (​L​i​и ​R​i)​. 
+ Найти сумму длин частей числовой прямой, окрашенных ровно в один слой.
+ 
+*/
 
 struct Dot {
     int x;
@@ -78,10 +86,6 @@ int main(){
     ///
     merge_sort<Dot>(input, 2*n, is_less);
     
-//    for (int i = 0; i < 2*n; ++i) {
-//        std::cout << input[i].x << " flag=" << input[i].flag << "\n";
-//    }
-    
     /// 3 - solve the task
     ///
     int thin = 0;
@@ -94,8 +98,6 @@ int main(){
         }
         if ((thin == 2 && input[i].flag == true) || (thin == 0 && input[i].flag == false)) {
             len += (input[i].x - input[i-1].x);
-            
-            //std::cout << "added " << input[i-1].x << "-" << input[i].x << "\n";
         }
     }
     
