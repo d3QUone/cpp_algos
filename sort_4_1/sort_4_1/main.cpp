@@ -8,6 +8,12 @@
 
 #include <iostream>
 
+/*
+ 
+ 4_1. ​Реализуйте стратегию выбора опорного элемента “медиана трёх”. Функцию Partition реализуйте методом прохода двумя итераторами от начала массива к концу.
+ 
+*/
+
 
 bool compare_ints(const int& L, const int& R) {
     return L < R;
@@ -16,8 +22,7 @@ bool compare_ints(const int& L, const int& R) {
 
 template <class T>
 T median_of_three(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
-    int cntr = (r + l + 1)/2; // <- FUCK YEA!!!
-    ///std::cout << "cntr=" << cntr << "\n";
+    int cntr = (r + l + 1)/2;
     if (is_less(arr[r], arr[l])) {
         std::swap(arr[r], arr[l]);
     }
@@ -35,49 +40,23 @@ T median_of_three(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
 // returns an index
 template <class T>
 int partition(T* arr, int l, int r, bool (*is_less)(const T&, const T&)) {
-//    std::cout << "\nInput:\n";
-//    for (int a = l; a <= r; ++a) {
-//        std::cout << arr[a] << " ";
-//    } std::cout << "\n";
-    
-    
     T pivot = median_of_three<T>(arr, l, r, is_less);
-    //std::cout << "pvt=" << pivot << "\n";
     
     int i = l;
     int j = l + 1;
     int pivot_index = r;
-    
-    //std::cout << "itm: " << arr[l] << " " << arr[base_index] << " " << arr[r] << "\n";
-    //std::cout << "ind: " << l << " " << base_index << " " << r << "\n";
-    
     while (j < pivot_index) {
         if (is_less(pivot, arr[j])) {
             j++ ;
         } else {
-            std::swap(arr[++i ], arr[j++ ]); // v1
-            
-//            std::swap(arr[j++ ], arr[base_index]); // v2
-//            base_index = j;
+            std::swap(arr[++i ], arr[j++ ]);
         }
-        
-        // just print it
-//        for (int a = l; a <= r; ++a) {
-//            std::cout << arr[a] << " ";
-//        } std::cout << "\n";
     }
     
     if (i + 1 < r) {
         i++ ;
         std::swap(arr[pivot_index], arr[i]);
     }
-    
-    // just print it
-    //std::cout << "Last swap:\n";
-//    for (int a = l; a <= r; ++a) {
-//        std::cout << arr[a] << " ";
-//    } std::cout << "\n";
-    
     return i;
 }
 
@@ -88,7 +67,6 @@ T find_K_stat(T* array, int asize, int k, bool (*is_less)(const T&, const T&)) {
     int r = asize - 1;
     while (true) {
         int index = partition(array, l, r, is_less);
-        //std::cout << "~index=" << index << "\n";
         if (index == k) {
             return array[k];
         } else if (k < index) {
