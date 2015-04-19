@@ -23,7 +23,9 @@
 
 #define MAX_LEN 1024
 
-void print_content(char** , size_t);
+void print_strings(char** , size_t);
+
+void print_chars(char* , size_t);
 
 
 // needs to check priority
@@ -43,7 +45,7 @@ size_t get_power(char op) {
 }
 
 
-// check if current char is operator
+// checks if current char is operator
 size_t is_operator(char op) {
     if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm')
         return 1;
@@ -52,6 +54,7 @@ size_t is_operator(char op) {
 }
 
 
+// checks if current char is digit
 size_t is_digit(char op) {
     if (op == '1' || op == '2' || op == '3' ||
         op == '4' || op == '5' || op == '6' ||
@@ -63,7 +66,20 @@ size_t is_digit(char op) {
 }
 
 
+// trying to build a generic stack
+/*
+typedef struct {
+    char** contents;
+    int top;
+    int maxSize;
+} stackT;
+*/
+
+
+
+
 // evaulates array in Postfix
+/*
 double evaulate_rpn(char* exp, size_t len) {
     double* stack = (double* ) malloc(len*sizeof(double)); // stack for operands
     size_t place = 0; // current stack size
@@ -83,40 +99,38 @@ double evaulate_rpn(char* exp, size_t len) {
             x0 = i + 1;
             printf("buf = %c", buffer);
         }
-        /*
-        if ( is_operator(*exp[i]) == 1) {
-            // takes out last 2 operands, processes
-            if (place > 1) {
-                a1 = stack[place - 2];
-                a2 = stack[place - 1];
-                
-                if (strncmp(exp[i], "+", 1) == 0)
-                    stack[place - 2] = a1 + a2;
-                else if (strncmp(exp[i], "-", 1) == 0)
-                    stack[place - 2] = a1 - a2;
-                else if (strncmp(exp[i], "*", 1) == 0)
-                    stack[place - 2] = a1 * a2;
-                else if (strncmp(exp[i], "/", 1) == 0)
-                    stack[place - 2] = a1 / a2;
-                
-                place -= 1;
-            } else {
-                // wrong order / anything else
-                printf("[error]");
-                exit(0);
-            }
-        } else {
-            // is operand -> convert char to double -> save double to stack
-            stack[place] = atof(exp[i]);
-            place++ ;
-        }
-         */
+        
+//        if ( is_operator(*exp[i]) == 1) {
+//            // takes out last 2 operands, processes
+//            if (place > 1) {
+//                a1 = stack[place - 2];
+//                a2 = stack[place - 1];
+//                
+//                if (strncmp(exp[i], "+", 1) == 0)
+//                    stack[place - 2] = a1 + a2;
+//                else if (strncmp(exp[i], "-", 1) == 0)
+//                    stack[place - 2] = a1 - a2;
+//                else if (strncmp(exp[i], "*", 1) == 0)
+//                    stack[place - 2] = a1 * a2;
+//                else if (strncmp(exp[i], "/", 1) == 0)
+//                    stack[place - 2] = a1 / a2;
+//                
+//                place -= 1;
+//            } else {
+//                // wrong order / anything else
+//                printf("[error]");
+//                exit(0);
+//            }
+//        } else {
+//            // is operand -> convert char to double -> save double to stack
+//            stack[place] = atof(exp[i]);
+//            place++ ;
+//        }
+        
     }
     return stack[0]; // result here
 }
-
-
-
+*/
 
 
 void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char* item, size_t size) {
@@ -124,12 +138,10 @@ void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char*
     if (*used_lines >= *out_lines) {
         *out_lines = (*out_lines) * 2;
         char** buf = (char** ) realloc(*reverse, *out_lines);
-        
         if (buf != NULL) {
             *reverse = buf;
+            free(buf);
         } else {
-            // free reverse !!!
-            
             printf("[error] - no memory");
             exit(0);
         }
@@ -140,14 +152,20 @@ void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char*
     memcpy(buf_string, item, size);
     buf_string[size] = '\0';
     
-    *reverse[*used_lines] = (char* ) malloc(size);
+    char* buf = (char* ) malloc(size);
+    if (buf != NULL) {
+        *reverse[*used_lines] = buf;
+    } else {
+        printf("[error] - no memory2");
+        exit(0);
+    }
+    
     strcpy(*reverse[*used_lines], buf_string);
     
     *used_lines += 1;
     
     free(buf_string);
 }
-
 
 
 
@@ -161,14 +179,17 @@ double create_rpn(char* exp, size_t len){
     char* stack = (char* ) malloc(len*sizeof(char));
     size_t stack_top = 0;  // position of last item in stack
     
-    // ready RPN!!!
+    // array of numbers
     size_t out_lines = 1;
     size_t used_lines = 0;
     char** reverse = (char** ) malloc(out_lines*sizeof(char* ));
     
+    // array of ready RevPolNotation
+    char** ready_RPN = (char** ) malloc(out_lines*sizeof(char* ));
+    
     char* buffer = (char* ) malloc(1); // for one current char
     
-    int digit = 0;
+    int digit = 0; // flag to start parsing Numbers/digits
     size_t start_index = 0; // for parsing Long-Vals
     
     size_t index = 0;
@@ -184,20 +205,18 @@ double create_rpn(char* exp, size_t len){
                 digit = 1;
             }
         } else {
-            
+            // push to stack when Num is over
             if (digit == 1) {
+                // if it was normall stack: 'reverse.append(buf_string)'
                 /*
+                // add some new Items whre to save line
                 if (used_lines >= out_lines) {
                     out_lines *= 2;
                     char** buf = (char** ) realloc(reverse, out_lines);
-                    
-                    
-                    
                     if (buf != NULL) {
                         reverse = buf;
+                        free(buf);
                     } else {
-                        // free reverse !!!
-                        
                         printf("[error] - no memory");
                         exit(0);
                     }
@@ -209,7 +228,16 @@ double create_rpn(char* exp, size_t len){
                 memcpy(buf_string, exp + start_index, size);
                 buf_string[size] = '\0';
                 
-                reverse[used_lines] = (char* ) malloc(size);
+                //reverse[used_lines] = (char* ) malloc(size);
+                char* buf = (char* ) malloc(size);
+                if (buf != NULL) {
+                    reverse[used_lines] = buf;
+                    free(buf);
+                } else {
+                    printf("[error] - no memory2");
+                    exit(0);
+                }
+                
                 strcpy(reverse[used_lines++ ], buf_string);
                 
                 free(buf_string);
@@ -219,27 +247,26 @@ double create_rpn(char* exp, size_t len){
                 
                 size_t size = index - start_index; // size of str
                 push_to_stack(&reverse, &out_lines, &used_lines, exp + start_index, size);
-                print_content(reverse, used_lines);
+                
+                printf("\ncontent: ");
+                print_strings(reverse, used_lines);
             }
-            
             
             if (is_operator(*buffer) == 1) {
                 strcat(stack, buffer);
                 stack_top++ ;
+                
+                printf("\nstack now: ");
+                print_chars(stack, stack_top);
             
-                printf("stack now: ");
-                for (int i = 0; i < stack_top; ++i) {
-                    printf("%c", stack[i]);
-                }
-                printf("\n");
-            
-            // pop -> push to res
             } else if (*buffer == '(') {
-                bracket_deep++ ;
-            
+                // pop -> push to res
                 strcat(stack, buffer);
                 stack_top++ ;
-                printf("stack now 2: %s\n", stack);
+                bracket_deep++ ;
+                
+                printf("\nstack now2: ");
+                print_chars(stack, stack_top);
             
             } else if (*buffer == ')') {
                 bracket_deep-- ;
@@ -247,16 +274,13 @@ double create_rpn(char* exp, size_t len){
                 while (*buffer != '(') {
                     //memcpy(buffer, &stack[stack_top-- ], 1);
                     //memcpy(reverse[used_lines++ ], buffer, 1);  // dont forget to check alloc size
-                
-                    
                     
                     printf("current buffer '%s', top: %zu\n", buffer, stack_top);
                     if (stack_top <= 0)
                         break;
                 }
             } else if (*buffer == ' ') {
-                // ignore it...
-            
+                // ignore this case
             } else {
                 printf("[error] - wrong char: '%s', %c\n", buffer, *buffer); // wrong char!
                 exit(0);
@@ -269,19 +293,16 @@ double create_rpn(char* exp, size_t len){
         }
         index++ ;
     }
-    
     free(buffer);
+    
     if (bracket_deep == 0) {
         //return evaulate_rpn(stack, stack_top);
-        printf("\nout stack check:\n");
-        for (int i = 0; i < stack_top; ++i) {
-            printf("%c\n", stack[i]);
-        }
-        printf("\n\nout result str:\n");
-        for (int i = 0; i < used_lines; ++i) {
-            printf("%s\n", reverse[i]);
-        }
         
+        printf("\nout stack check:\n");
+        print_chars(stack, stack_top);
+        
+        printf("\n\nout result str:\n");
+        print_strings(reverse, used_lines);
         return 0.0;
     } else {
         // wrong brackets
@@ -310,14 +331,6 @@ int main(){
 }
 
 
-// - OK!
-int test_atof(){
-    printf("%.2f\n", atof("123.")); // 123.00
-    printf("%.2f\n", atof(".123")); // 0.12
-    printf("%.2f\n", atof("."));    // 0.00
-    return 0;
-}
-
 
 int main_rel() {
     char* expression = (char* ) malloc(MAX_LEN*sizeof(char));
@@ -344,10 +357,29 @@ int main_rel() {
 }
 
 
-void print_content(char** array, size_t size) {
-    printf("\nprint_content: ");
+///// PRINTING FUNCTIONS /////
+
+void print_strings(char** array, size_t size) {
     for (size_t i = 0; i < size; ++i) {
         printf("%s ", array[i]);
     }
     printf("\n");
+}
+
+
+void print_chars(char* array, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        printf("%c", array[i]);
+    }
+    printf("\n");
+}
+
+
+///// TESTS /////
+
+int test_atof(){
+    printf("%.2f\n", atof("123.")); // 123.00
+    printf("%.2f\n", atof(".123")); // 0.12
+    printf("%.2f\n", atof("."));    // 0.00
+    return 0;
 }
