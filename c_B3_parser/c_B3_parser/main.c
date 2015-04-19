@@ -159,7 +159,7 @@ void push_to_stack_old(char*** reverse, size_t* out_lines, size_t* used_lines, c
     }
     
     strcpy(*reverse[*used_lines], buf_string);
-    *used_lines++;
+    *used_lines += 1;
     
     //free(buf_string);
 }
@@ -174,14 +174,15 @@ void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char*
     char* str = calloc(size + 1, sizeof(char));
     if (str) {
         
-    //    for(int i = 0; i < size; i++){
-    //        str[i] = item[i];
-    //    }
-        memcpy(str, item, size + 1);
-        //str[size] = '\0';
+        //    for(int i = 0; i < size; i++){
+        //        str[i] = item[i];
+        //    }
         
-        *reverse[*used_lines] = str;
-        *used_lines++;
+        memcpy(str, item, size + 1);
+        str[size] = '\0';
+        
+        (*reverse)[*used_lines] = str;
+        (*used_lines)++ ;
     } else {
         printf("[error] - no memory2");
         exit(0);

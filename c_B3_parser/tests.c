@@ -7,6 +7,8 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 void print_strings(char** array, size_t size) {
@@ -17,7 +19,7 @@ void print_strings(char** array, size_t size) {
 }
 
 
-void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char* item, size_t size) {
+void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, const char* item, size_t size) {
     if(*out_lines >= *used_lines){
         *out_lines *= 2;
         *reverse = (char** )realloc(*reverse, *out_lines * sizeof(char**));
@@ -25,15 +27,11 @@ void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char*
     
     char* str = calloc(size + 1, sizeof(char));
     if (str) {
-        
-        //    for(int i = 0; i < size; i++){
-        //        str[i] = item[i];
-        //    }
         memcpy(str, item, size + 1);
-        //str[size] = '\0';
+        str[size] = '\0';
         
-        *reverse[*used_lines] = str;
-        *used_lines++;
+        (*reverse)[*used_lines] = str;
+        (*used_lines)++ ;
     } else {
         printf("[error] - no memory2");
         exit(0);
@@ -51,13 +49,10 @@ int main(){
     const char* test[] = {"10.3cc", "20.1", "31", "491.3"};
     
     for (size_t i = 0; i < n; ++i) {
-        push_to_stack(&reverse, &out_lines, &used_lines, test[i], sizeof(test[i]));
-        print_strings(reverse, out_lines);
+        push_to_stack(&reverse, &out_lines, &used_lines, test[i], strlen(test[i]));
+        print_strings(reverse, used_lines);
     }
     
     printf("\nDone\n");
     return 0;
 }
-
-
-
