@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /*
 Требуется написать программу, которая способна вычислять арифметические выражения.
 Выражения могут содержать: знаки операций '+', '-', '/', '*', cкобки '(', ')', целые и вещественные числа
@@ -64,17 +63,6 @@ size_t is_digit(char op) {
     else
         return 0;
 }
-
-
-// trying to build a generic stack
-/*
-typedef struct {
-    char** contents;
-    int top;
-    int maxSize;
-} stackT;
-*/
-
 
 
 // evaulates array in Postfix
@@ -132,12 +120,11 @@ double evaulate_rpn(char* exp, size_t len) {
 */
 
 
-void push_to_stack_old(char*** reverse, size_t* out_lines, size_t* used_lines, char* item, size_t size) {
-    // realloc
-    if (*used_lines >= *out_lines) {
-        *out_lines = (*out_lines) * 2;
-        char** buf = (char** ) realloc(*reverse, (*out_lines)*sizeof(char* ));
-        if (buf != NULL) {
+void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, const char* item, size_t size) {
+    if(*out_lines >= *used_lines){
+        *out_lines *= 2;
+        char** buf = (char** ) realloc(*reverse, (*out_lines)*sizeof(char** ));
+        if (buf) {
             *reverse = buf;
         } else {
             printf("[error] - no memory");
@@ -145,39 +132,8 @@ void push_to_stack_old(char*** reverse, size_t* out_lines, size_t* used_lines, c
         }
     }
     
-    // save
-    char* buf_string = (char* ) malloc(size + 1);
-    memcpy(buf_string, item, size);
-    buf_string[size] = '\0';
-    
-    char* buf = (char* ) malloc(size + 1);
-    if (buf != NULL) {
-        *reverse[*used_lines] = buf;
-    } else {
-        printf("[error] - no memory2");
-        exit(0);
-    }
-    
-    strcpy(*reverse[*used_lines], buf_string);
-    *used_lines += 1;
-    
-    //free(buf_string);
-}
-
-
-void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char* item, size_t size) {
-    if(*out_lines >= *used_lines){
-        *out_lines *= 2;
-        *reverse = (char** )realloc(*reverse, *out_lines * sizeof(char**));
-    }
-    
     char* str = calloc(size + 1, sizeof(char));
     if (str) {
-        
-        //    for(int i = 0; i < size; i++){
-        //        str[i] = item[i];
-        //    }
-        
         memcpy(str, item, size + 1);
         str[size] = '\0';
         
@@ -192,23 +148,21 @@ void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, char*
 
 // testing 'push_to_stack'
 int main(){
-    size_t out_lines = 1;
+    size_t inited_lines = 1;
     size_t used_lines = 0;
-    char** reverse = (char** ) malloc(out_lines*sizeof(char* ));
+    char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
     
     size_t n = 4;
     const char* test[] = {"10.3cc", "20.1", "31", "491.3"};
     
     for (size_t i = 0; i < n; ++i) {
-        push_to_stack(&reverse, &out_lines, &used_lines, test[i], sizeof(test[i]));
-        print_strings(reverse, out_lines);
+        push_to_stack(&reverse, &inited_lines, &used_lines, test[i], sizeof(test[i]));
+        print_strings(reverse, used_lines);
     }
     
-    printf("\nDone\n");
+    printf("Done\n");
     return 0;
 }
-
-
 
 
 
@@ -223,12 +177,12 @@ double create_rpn(char* exp, size_t len){
     size_t stack_top = 0;  // position of last item in stack
     
     // array of numbers
-    size_t out_lines = 1;
+    size_t inited_lines = 1;
     size_t used_lines = 0;
-    char** reverse = (char** ) malloc(out_lines*sizeof(char* ));
+    char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
     
     // array of ready RevPolNotation
-    char** ready_RPN = (char** ) malloc(out_lines*sizeof(char* ));
+    char** ready_RPN = (char** ) malloc(inited_lines*sizeof(char* ));
     
     char* buffer = (char* ) malloc(1); // for one current char
     
@@ -282,14 +236,13 @@ double create_rpn(char* exp, size_t len){
                 }
                 
                 strcpy(reverse[used_lines++ ], buf_string);
-                
                 free(buf_string);
                 */
                 
                 digit = 0;
                 
                 size_t size = index - start_index; // size of str
-                push_to_stack(&reverse, &out_lines, &used_lines, exp + start_index, size);
+                push_to_stack(&reverse, &inited_lines, &used_lines, exp + start_index, size);
                 
                 printf("\ncontent: ");
                 print_strings(reverse, used_lines);
