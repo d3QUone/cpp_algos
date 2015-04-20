@@ -29,43 +29,39 @@ void print_chars(char* , size_t);
 
 // needs to check priority
 size_t get_power(char op) {
-    if (op == '+')
-        return 1;
-    else if (op == '-')
+    if (op == '+') {
         return 2;
-    else if (op == '*')
-        return 3;
-    else if (op == '/')
+    } else if (op == '-') {
+        return 2;
+    } else if (op == '*') {
         return 4;
-    else if (op == 'm') // let unary minus has max priority
-        return 5;
-    else
+    } else if (op == '/') {
+        return 4;
+    } else if (op == 'm') {
+        return 5;  // let unary minus has max priority ???? absolutly not tested
+    } else {
         return 0;
+    }
 }
 
 
 // checks if current char is operator
 size_t is_operator(char op) {
-    if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm')
+    if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm') {
         return 1;
-    else
+    } else {
         return 0;
+    }
 }
 
 
 // checks if current char is digit
 size_t is_digit(char op) {
-    
-//    if (op == '1' || op == '2' || op == '3' ||
-//        op == '4' || op == '5' || op == '6' ||
-//        op == '7' || op == '8' || op == '9' ||
-//        op == '0' || op == '.')
-//        return 1;
-    
-    if ((op >= '0' && op <= '9') || op == '.')
+    if ((op >= '0' && op <= '9') || op == '.') {
         return 1;
-    else
+    } else {
         return 0;
+    }
 }
 
 
@@ -170,7 +166,7 @@ int main_TEST_PTS(){
 
 // transform from Infix to Postfix notation
 double create_rpn(char* exp, size_t len){
-    printf("got exp: %s, %zu chars\n\n", exp, len);
+    printf("Exp: %s, %zu chars\n", exp, len);
     
     int bracket_deep = 0; // ? may be no need // check inside Stack repush
     
@@ -189,10 +185,13 @@ double create_rpn(char* exp, size_t len){
     size_t start_index = 0; // for parsing Long-Vals
     
     size_t index = 0;
-    while (index < len) {
+    while (index <= len) {
         // buffer constats only 1 char but it is a string
         memcpy(buffer, &exp[index], 1);
-        printf("buffer = %s\n", buffer);
+
+        if (*buffer != ' ') {
+            printf("buffer: '%s'\n", buffer);
+        }
         
         if (is_digit(*buffer) == 1) {
             // save first digit place
@@ -207,42 +206,67 @@ double create_rpn(char* exp, size_t len){
                 size_t size = index - start_index; // size of str
                 push_to_stack(&reverse, &inited_lines, &used_lines, exp + start_index, size);
                 
-                printf("\ncontent: ");
+                printf("\nRPN: ");
                 print_strings(reverse, used_lines);
             }
             
             // push Operands + check priority
             if (is_operator(*buffer) == 1) {
+                // check priority, push to Res
+                size_t power = get_power(*buffer);
+                for (int i = stack_top; i >= 0; --i) {
+                    if (get_power(stack[i]) >= power) {
+                        push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
+                        stack_top-- ;
+                    }
+                }
+                
+                printf("\nresult updated: ");
+                print_strings(reverse, used_lines);
+                
+                // push itself to stack
                 strcat(stack, buffer);
                 stack_top++ ;
                 
-                printf("\nstack now: ");
+                printf("-stack now: ");
                 print_chars(stack, stack_top);
-            
+                
             } else if (*buffer == '(') {
-                // pop -> push to stack
                 strcat(stack, buffer);
                 stack_top++ ;
                 bracket_deep++ ;
                 
-                printf("\nstack now2: ");
+                printf("-stack now: ");
                 print_chars(stack, stack_top);
-            
             } else if (*buffer == ')') {
                 // push operands to result
-                
                 bracket_deep-- ;
                 while (stack[stack_top] != '(') {
-                    memcpy(buffer, &stack[stack_top-- ], 1);
-                    push_to_stack(&reverse, &inited_lines, &used_lines, buffer, strlen(buffer));
+                    memcpy(buffer, &stack[stack_top], 1);
+                    push_to_stack(&reverse, &inited_lines, &used_lines, buffer, 1);
                     
-                    printf("current buffer '%s', stack size: %zu\n", buffer, stack_top);
-                    if (stack_top <= 0)
+                    //printf("current buffer '%s', stack size: %zu\n", buffer, stack_top);
+                    if (stack_top > 0) {
+                        stack_top-- ;
+                    } else {
                         break;
+                    }
                 }
+                
+                printf(".stack check: ");
+                print_chars(stack, stack_top);
+                
+                printf(".result str: ");
+                print_strings(reverse, used_lines);
                 
             } else if (*buffer == ' ') {
                 // ignore this case
+            } else if (*buffer == 0) {
+                printf("EOF - push %d from stack\n", stack_top);
+                for (int i = stack_top; i >= 0; --i) {
+                    push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
+                }
+                stack_top = 0;
             } else {
                 printf("[error] - wrong char: '%s', %c\n", buffer, *buffer); // wrong char!
                 exit(0);
@@ -276,7 +300,12 @@ double create_rpn(char* exp, size_t len){
 
 int main(){
     //char* expression = "(10.3  +20.1 + 31)- 491.3";    // -> "10.3 20.1 + 31 + 491.3 -"
-    char* expression = "3 + 4 * 2 / ( 1 - 5)";  // -> "3 4 2 * 1 5 - / +"
+//    char* expression = "3 + 4 * 2 / ( 1 - 5)";
+//    char* rpn = "3 4 2 * 1 5 - / +";
+    
+    char* expression = "3 + 4 * 2";
+    char* rpn = "3 4 2 * +";
+    
     double result = create_rpn(expression, strlen(expression));
     
     // -- v1 func --
@@ -290,9 +319,9 @@ int main(){
     //double result = evaulate_rpn(test, sizeof(test));
     
     printf("%.2f\n", result);
+    printf("%s", rpn);
     return 0;
 }
-
 
 
 int main_rel() {
