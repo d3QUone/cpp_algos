@@ -212,28 +212,29 @@ double create_rpn(char* exp, size_t len){
             
             // push Operands + check priority
             if (is_operator(*buffer) == 1) {
-                // check priority, push to Res
                 size_t power = get_power(*buffer);
                 for (int i = stack_top; i >= 0; --i) {
+                    if (stack[i] == '(') {
+                        break;
+                    }
+                    
                     if (get_power(stack[i]) >= power) {
                         push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                         stack_top-- ;
                     }
                 }
+                // push current Operand to stack
+                stack[stack_top++ ] = *buffer;
                 
-                printf("\nresult updated: ");
+                printf("\n~stack now: ");
+                print_chars(stack, stack_top);
+
+                printf("~result updated: ");
                 print_strings(reverse, used_lines);
                 
-                // push itself to stack
-                strcat(stack, buffer);
-                stack_top++ ;
-                
-                printf("-stack now: ");
-                print_chars(stack, stack_top);
-                
             } else if (*buffer == '(') {
-                strcat(stack, buffer);
-                stack_top++ ;
+                stack[stack_top++ ] = *buffer;
+                
                 bracket_deep++ ;
                 
                 printf("-stack now: ");
@@ -241,17 +242,17 @@ double create_rpn(char* exp, size_t len){
             } else if (*buffer == ')') {
                 // push operands to result
                 bracket_deep-- ;
+                stack_top --;
                 while (stack[stack_top] != '(') {
-                    memcpy(buffer, &stack[stack_top], 1);
-                    push_to_stack(&reverse, &inited_lines, &used_lines, buffer, 1);
-                    
-                    //printf("current buffer '%s', stack size: %zu\n", buffer, stack_top);
+                    push_to_stack(&reverse, &inited_lines, &used_lines, &stack[stack_top], 1);
+                    printf("current item '%c', stack size: %zu\n", stack[stack_top], stack_top);
                     if (stack_top > 0) {
                         stack_top-- ;
                     } else {
                         break;
                     }
                 }
+                stack_top --; // delete '('
                 
                 printf(".stack check: ");
                 print_chars(stack, stack_top);
@@ -262,7 +263,7 @@ double create_rpn(char* exp, size_t len){
             } else if (*buffer == ' ') {
                 // ignore this case
             } else if (*buffer == 0) {
-                printf("EOF - push %d from stack\n", stack_top);
+                printf("EOF - push %zu from stack\n", stack_top);
                 for (int i = stack_top; i >= 0; --i) {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                 }
@@ -303,8 +304,8 @@ int main(){
 //    char* expression = "3 + 4 * 2 / ( 1 - 5)";
 //    char* rpn = "3 4 2 * 1 5 - / +";
     
-    char* expression = "3 + 4 * 2";
-    char* rpn = "3 4 2 * +";
+    char* expression = "((3 + 4) * 2 - 7) / 13";
+    char* rpn = "3 4 2 * + 7 - 13 /";
     
     double result = create_rpn(expression, strlen(expression));
     
