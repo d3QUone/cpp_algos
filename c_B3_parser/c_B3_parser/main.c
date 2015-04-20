@@ -37,7 +37,7 @@ size_t get_power(char op) {
         return 3;
     else if (op == '/')
         return 4;
-    else if (op == 'm') // let binary minus has max priority
+    else if (op == 'm') // let unary minus has max priority
         return 5;
     else
         return 0;
@@ -55,10 +55,14 @@ size_t is_operator(char op) {
 
 // checks if current char is digit
 size_t is_digit(char op) {
-    if (op == '1' || op == '2' || op == '3' ||
-        op == '4' || op == '5' || op == '6' ||
-        op == '7' || op == '8' || op == '9' ||
-        op == '0' || op == '.')
+    
+//    if (op == '1' || op == '2' || op == '3' ||
+//        op == '4' || op == '5' || op == '6' ||
+//        op == '7' || op == '8' || op == '9' ||
+//        op == '0' || op == '.')
+//        return 1;
+    
+    if ((op >= '0' && op <= '9') || op == '.')
         return 1;
     else
         return 0;
@@ -120,10 +124,10 @@ double evaulate_rpn(char* exp, size_t len) {
 */
 
 
-void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, const char* item, size_t size) {
-    if(*out_lines >= *used_lines){
-        *out_lines *= 2;
-        char** buf = (char** ) realloc(*reverse, (*out_lines)*sizeof(char** ));
+void push_to_stack(char*** reverse, size_t* inited_lines, size_t* used_lines, const char* item, size_t size) {
+    if(*inited_lines >= *used_lines){
+        *inited_lines *= 2;
+        char** buf = (char** ) realloc(*reverse, (*inited_lines)*sizeof(char** ));
         if (buf) {
             *reverse = buf;
         } else {
@@ -147,23 +151,21 @@ void push_to_stack(char*** reverse, size_t* out_lines, size_t* used_lines, const
 
 
 // testing 'push_to_stack'
-int main(){
+int main_TEST_PTS(){
     size_t inited_lines = 1;
     size_t used_lines = 0;
     char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
     
     size_t n = 4;
-    const char* test[] = {"10.3cc", "20.1", "31", "491.3"};
+    const char* test[] = {"10.3", "20.1", "31", "491.3"};
     
     for (size_t i = 0; i < n; ++i) {
-        push_to_stack(&reverse, &inited_lines, &used_lines, test[i], sizeof(test[i]));
+        push_to_stack(&reverse, &inited_lines, &used_lines, test[i], strlen(test[i]));
         print_strings(reverse, used_lines);
     }
-    
     printf("Done\n");
     return 0;
 }
-
 
 
 // transform from Infix to Postfix notation
@@ -180,9 +182,6 @@ double create_rpn(char* exp, size_t len){
     size_t inited_lines = 1;
     size_t used_lines = 0;
     char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
-    
-    // array of ready RevPolNotation
-    char** ready_RPN = (char** ) malloc(inited_lines*sizeof(char* ));
     
     char* buffer = (char* ) malloc(1); // for one current char
     
@@ -204,43 +203,7 @@ double create_rpn(char* exp, size_t len){
         } else {
             // push to stack when Num is over
             if (digit == 1) {
-                // if it was normall stack: 'reverse.append(buf_string)'
-                /*
-                // add some new Items whre to save line
-                if (used_lines >= out_lines) {
-                    out_lines *= 2;
-                    char** buf = (char** ) realloc(reverse, out_lines);
-                    if (buf != NULL) {
-                        reverse = buf;
-                        free(buf);
-                    } else {
-                        printf("[error] - no memory");
-                        exit(0);
-                    }
-                }
-                
-                // save
-                size_t size = index - start_index; // size of str
-                char* buf_string = (char* ) malloc(size + 1);
-                memcpy(buf_string, exp + start_index, size);
-                buf_string[size] = '\0';
-                
-                //reverse[used_lines] = (char* ) malloc(size);
-                char* buf = (char* ) malloc(size);
-                if (buf != NULL) {
-                    reverse[used_lines] = buf;
-                    free(buf);
-                } else {
-                    printf("[error] - no memory2");
-                    exit(0);
-                }
-                
-                strcpy(reverse[used_lines++ ], buf_string);
-                free(buf_string);
-                */
-                
                 digit = 0;
-                
                 size_t size = index - start_index; // size of str
                 push_to_stack(&reverse, &inited_lines, &used_lines, exp + start_index, size);
                 
@@ -248,6 +211,7 @@ double create_rpn(char* exp, size_t len){
                 print_strings(reverse, used_lines);
             }
             
+            // push Operands + check priority
             if (is_operator(*buffer) == 1) {
                 strcat(stack, buffer);
                 stack_top++ ;
@@ -256,7 +220,7 @@ double create_rpn(char* exp, size_t len){
                 print_chars(stack, stack_top);
             
             } else if (*buffer == '(') {
-                // pop -> push to res
+                // pop -> push to stack
                 strcat(stack, buffer);
                 stack_top++ ;
                 bracket_deep++ ;
@@ -265,16 +229,18 @@ double create_rpn(char* exp, size_t len){
                 print_chars(stack, stack_top);
             
             } else if (*buffer == ')') {
-                bracket_deep-- ;
+                // push operands to result
                 
-                while (*buffer != '(') {
-                    //memcpy(buffer, &stack[stack_top-- ], 1);
-                    //memcpy(reverse[used_lines++ ], buffer, 1);  // dont forget to check alloc size
+                bracket_deep-- ;
+                while (stack[stack_top] != '(') {
+                    memcpy(buffer, &stack[stack_top-- ], 1);
+                    push_to_stack(&reverse, &inited_lines, &used_lines, buffer, strlen(buffer));
                     
-                    printf("current buffer '%s', top: %zu\n", buffer, stack_top);
+                    printf("current buffer '%s', stack size: %zu\n", buffer, stack_top);
                     if (stack_top <= 0)
                         break;
                 }
+                
             } else if (*buffer == ' ') {
                 // ignore this case
             } else {
@@ -297,7 +263,7 @@ double create_rpn(char* exp, size_t len){
         printf("\nout stack check:\n");
         print_chars(stack, stack_top);
         
-        printf("\n\nout result str:\n");
+        printf("\nout result str:\n");
         print_strings(reverse, used_lines);
         return 0.0;
     } else {
@@ -308,8 +274,9 @@ double create_rpn(char* exp, size_t len){
 }
 
 
-int mainKAO(){
-    char* expression = "(10.3  +20.1 + 31)- 491.3"; // -> "10.3 20.1 + 31 + 491.3 -"
+int main(){
+    //char* expression = "(10.3  +20.1 + 31)- 491.3";    // -> "10.3 20.1 + 31 + 491.3 -"
+    char* expression = "3 + 4 * 2 / ( 1 - 5)";  // -> "3 4 2 * 1 5 - / +"
     double result = create_rpn(expression, strlen(expression));
     
     // -- v1 func --
@@ -368,14 +335,4 @@ void print_chars(char* array, size_t size) {
         printf("%c", array[i]);
     }
     printf("\n");
-}
-
-
-///// TESTS /////
-
-int test_atof(){
-    printf("%.2f\n", atof("123.")); // 123.00
-    printf("%.2f\n", atof(".123")); // 0.12
-    printf("%.2f\n", atof("."));    // 0.00
-    return 0;
 }
