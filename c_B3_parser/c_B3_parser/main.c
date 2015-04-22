@@ -66,58 +66,43 @@ size_t is_digit(char op) {
 
 
 // evaulates array in Postfix
-/*
-double evaulate_rpn(char* exp, size_t len) {
+double evaulate_rpn(char** exp, size_t len) {
     double* stack = (double* ) malloc(len*sizeof(double)); // stack for operands
     size_t place = 0; // current stack size
     
     double a1 = 0.0;
     double a2 = 0.0; // buffers to save stack items
     
-    //char* buffer = (char* )malloc(30);
-    char buffer;
-    size_t x0 = 0; // index of last space
-    
     for (size_t i = 0; i < len; ++i) {
-        if (exp[i] == ' ') {
-            for (size_t j = x0; j < i; ++j) {
-                buffer += exp[j]; // ? strcat ?
+        if (is_operator(*exp[i]) == 1) {
+            // takes out last 2 operands, processes
+            if (place > 1) {
+                a1 = stack[place - 2];
+                a2 = stack[place - 1];
+                
+                if (strncmp(exp[i], "+", 1) == 0)
+                    stack[place - 2] = a1 + a2;
+                else if (strncmp(exp[i], "-", 1) == 0)
+                    stack[place - 2] = a1 - a2;
+                else if (strncmp(exp[i], "*", 1) == 0)
+                    stack[place - 2] = a1 * a2;
+                else if (strncmp(exp[i], "/", 1) == 0)
+                    stack[place - 2] = a1 / a2;
+                
+                place -= 1;
+            } else {
+                // wrong order / anything else
+                printf("[error]");
+                exit(0);
             }
-            x0 = i + 1;
-            printf("buf = %c", buffer);
+        } else {
+            // is operand -> convert char to double -> save double to stack
+            stack[place] = atof(exp[i]);
+            place++ ;
         }
-        
-//        if ( is_operator(*exp[i]) == 1) {
-//            // takes out last 2 operands, processes
-//            if (place > 1) {
-//                a1 = stack[place - 2];
-//                a2 = stack[place - 1];
-//                
-//                if (strncmp(exp[i], "+", 1) == 0)
-//                    stack[place - 2] = a1 + a2;
-//                else if (strncmp(exp[i], "-", 1) == 0)
-//                    stack[place - 2] = a1 - a2;
-//                else if (strncmp(exp[i], "*", 1) == 0)
-//                    stack[place - 2] = a1 * a2;
-//                else if (strncmp(exp[i], "/", 1) == 0)
-//                    stack[place - 2] = a1 / a2;
-//                
-//                place -= 1;
-//            } else {
-//                // wrong order / anything else
-//                printf("[error]");
-//                exit(0);
-//            }
-//        } else {
-//            // is operand -> convert char to double -> save double to stack
-//            stack[place] = atof(exp[i]);
-//            place++ ;
-//        }
-        
     }
     return stack[0]; // result here
 }
-*/
 
 
 void push_to_stack(char*** reverse, size_t* inited_lines, size_t* used_lines, const char* item, size_t size) {
@@ -131,7 +116,6 @@ void push_to_stack(char*** reverse, size_t* inited_lines, size_t* used_lines, co
             exit(0);
         }
     }
-    
     char* str = calloc(size + 1, sizeof(char));
     if (str) {
         memcpy(str, item, size + 1);
@@ -146,27 +130,9 @@ void push_to_stack(char*** reverse, size_t* inited_lines, size_t* used_lines, co
 }
 
 
-// testing 'push_to_stack'
-int main_TEST_PTS(){
-    size_t inited_lines = 1;
-    size_t used_lines = 0;
-    char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
-    
-    size_t n = 4;
-    const char* test[] = {"10.3", "20.1", "31", "491.3"};
-    
-    for (size_t i = 0; i < n; ++i) {
-        push_to_stack(&reverse, &inited_lines, &used_lines, test[i], strlen(test[i]));
-        print_strings(reverse, used_lines);
-    }
-    printf("Done\n");
-    return 0;
-}
-
-
 // transform from Infix to Postfix notation
 double create_rpn(char* exp, size_t len){
-    printf("Exp: %s, %zu chars\n", exp, len);
+    //printf("Exp: %s, %zu chars\n", exp, len);
     int bracket_deep = 0; // ? may be no need // check inside Stack repush
     
     // stack of chars for operands ()+-*/
@@ -186,9 +152,9 @@ double create_rpn(char* exp, size_t len){
     while (index <= len) {
         // buffer constats only 1 char but it is a string
         memcpy(buffer, &exp[index], 1);
-        if (*buffer != ' ') {
-            printf("buffer: '%s'\n", buffer);
-        }
+//        if (*buffer != ' ') {
+//            printf("buffer: '%s'\n", buffer);
+//        }
         
         if (is_digit(*buffer) == 1) {
             // save first digit place
@@ -203,8 +169,8 @@ double create_rpn(char* exp, size_t len){
                 size_t size = index - start_index; // size of str
                 push_to_stack(&reverse, &inited_lines, &used_lines, exp + start_index, size);
                 
-                printf("\nRPN: ");
-                print_strings(reverse, used_lines);
+//                printf("\nRPN: ");
+//                print_strings(reverse, used_lines);
             }
             
             // push Operands + check priority
@@ -222,52 +188,55 @@ double create_rpn(char* exp, size_t len){
                 // push current Operand to stack
                 stack[stack_top++ ] = *buffer;
                 
-                printf("\n~stack now: ");
-                print_chars(stack, stack_top);
-
-                printf("~result updated: ");
-                print_strings(reverse, used_lines);
+//                printf("\n~stack now: ");
+//                print_chars(stack, stack_top);
+//
+//                printf("~result updated: ");
+//                print_strings(reverse, used_lines);
                 
             } else if (*buffer == '(') {
                 stack[stack_top++ ] = *buffer;
                 bracket_deep++ ;
                 
-                printf("-stack now: ");
-                print_chars(stack, stack_top);
+//                printf("-stack now: ");
+//                print_chars(stack, stack_top);
             } else if (*buffer == ')') {
                 // push operands to result
                 bracket_deep-- ;
                 stack_top-- ; // if no, '' will be added to output
                 while (stack[stack_top] != '(') {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[stack_top], 1);
-                    printf("current item '%c', stack size: %zu\n", stack[stack_top], stack_top);
+                    //printf("current item '%c', stack size: %zu\n", stack[stack_top], stack_top);
                     if (stack_top > 0) {
                         stack_top-- ;
                     } else {
                         break;
                     }
                 }
-                printf(".stack check: ");
-                print_chars(stack, stack_top);
                 
-                printf(".result str: ");
-                print_strings(reverse, used_lines);
+//                printf(".stack check: ");
+//                print_chars(stack, stack_top);
+//                
+//                printf(".result str: ");
+//                print_strings(reverse, used_lines);
+                
             } else if (*buffer == ' ') {
                 // ignore this case
             } else if (*buffer == 0) {
-                printf("EOF - push %zu from stack\n", stack_top);
+                //printf("EOF - push %zu from stack\n", stack_top);
                 for (int i = stack_top - 1; i >= 0; --i) {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                 }
                 stack_top = 0;
             } else {
-                printf("[error] - wrong char: '%s', %c\n", buffer, *buffer); // wrong char!
+                printf("[error]"); // - wrong char: '%s', %c\n", buffer, *buffer); // wrong char!
                 exit(0);
             }
         }
         
         if (bracket_deep < 0) {
-            printf("--wrong bracket expr!\n");
+            printf("[error]");
+//            printf("--wrong bracket expr!\n");
             exit(0);
         }
         index++ ;
@@ -275,14 +244,14 @@ double create_rpn(char* exp, size_t len){
     free(buffer);
     
     if (bracket_deep == 0) {
-        //return evaulate_rpn(stack, stack_top);
+//        printf("\nout stack check:\n");
+//        print_chars(stack, stack_top);
+//        
+//        printf("\nout result str:\n");
+//        print_strings(reverse, used_lines);
         
-        printf("\nout stack check:\n");
-        print_chars(stack, stack_top);
-        
-        printf("\nout result str:\n");
-        print_strings(reverse, used_lines);
-        return 0.0;
+        return evaulate_rpn(reverse, used_lines);
+//        return 0.0;
     } else {
         // wrong brackets
         printf("[error] - wrong brackets");
@@ -291,15 +260,15 @@ double create_rpn(char* exp, size_t len){
 }
 
 
-int main(){
-    char* expression = "(10.3  +20.1 + 31)- 491.3";
-    char* rpn = "10.3 20.1 + 31 + 491.3 -";
+int maixxn(){
+//    char* expression = "(10.3  +20.1 + 31)- 491.3";
+//    char* rpn = "10.3 20.1 + 31 + 491.3 -";
     
 //    char* expression = "3 + 4 * 2 / ( 1 - 5)";
 //    char* rpn = "3 4 2 * 1 5 - / +";
     
-//    char* expression = "((3 + 4) * 2 - 7) / 13";
-//    char* rpn = "3 4 + 2 * 7 - 13 /";
+    char* expression = "((3 + 4) * 2 - 7) / 13";
+    char* rpn = "3 4 + 2 * 7 - 13 /";
     
     double result = create_rpn(expression, strlen(expression));
     
@@ -319,7 +288,7 @@ int main(){
 }
 
 
-int main_rel() {
+int main() {
     char* expression = (char* ) malloc(MAX_LEN*sizeof(char));
     if (expression == NULL) {
         printf("[error]");
