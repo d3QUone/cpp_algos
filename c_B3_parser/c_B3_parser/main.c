@@ -167,7 +167,6 @@ int main_TEST_PTS(){
 // transform from Infix to Postfix notation
 double create_rpn(char* exp, size_t len){
     printf("Exp: %s, %zu chars\n", exp, len);
-    
     int bracket_deep = 0; // ? may be no need // check inside Stack repush
     
     // stack of chars for operands ()+-*/
@@ -178,7 +177,6 @@ double create_rpn(char* exp, size_t len){
     size_t inited_lines = 1;
     size_t used_lines = 0;
     char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
-    
     char* buffer = (char* ) malloc(1); // for one current char
     
     int digit = 0; // flag to start parsing Numbers/digits
@@ -188,7 +186,6 @@ double create_rpn(char* exp, size_t len){
     while (index <= len) {
         // buffer constats only 1 char but it is a string
         memcpy(buffer, &exp[index], 1);
-
         if (*buffer != ' ') {
             printf("buffer: '%s'\n", buffer);
         }
@@ -213,11 +210,10 @@ double create_rpn(char* exp, size_t len){
             // push Operands + check priority
             if (is_operator(*buffer) == 1) {
                 size_t power = get_power(*buffer);
-                for (int i = stack_top; i >= 0; --i) {
+                for (int i = stack_top - 1; i >= 0; --i) {
                     if (stack[i] == '(') {
                         break;
                     }
-                    
                     if (get_power(stack[i]) >= power) {
                         push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                         stack_top-- ;
@@ -234,7 +230,6 @@ double create_rpn(char* exp, size_t len){
                 
             } else if (*buffer == '(') {
                 stack[stack_top++ ] = *buffer;
-                
                 bracket_deep++ ;
                 
                 printf("-stack now: ");
@@ -242,7 +237,7 @@ double create_rpn(char* exp, size_t len){
             } else if (*buffer == ')') {
                 // push operands to result
                 bracket_deep-- ;
-                stack_top --;
+                stack_top-- ; // if no, '' will be added to output
                 while (stack[stack_top] != '(') {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[stack_top], 1);
                     printf("current item '%c', stack size: %zu\n", stack[stack_top], stack_top);
@@ -252,19 +247,16 @@ double create_rpn(char* exp, size_t len){
                         break;
                     }
                 }
-                stack_top --; // delete '('
-                
                 printf(".stack check: ");
                 print_chars(stack, stack_top);
                 
                 printf(".result str: ");
                 print_strings(reverse, used_lines);
-                
             } else if (*buffer == ' ') {
                 // ignore this case
             } else if (*buffer == 0) {
                 printf("EOF - push %zu from stack\n", stack_top);
-                for (int i = stack_top; i >= 0; --i) {
+                for (int i = stack_top - 1; i >= 0; --i) {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                 }
                 stack_top = 0;
@@ -300,12 +292,14 @@ double create_rpn(char* exp, size_t len){
 
 
 int main(){
-    //char* expression = "(10.3  +20.1 + 31)- 491.3";    // -> "10.3 20.1 + 31 + 491.3 -"
+    char* expression = "(10.3  +20.1 + 31)- 491.3";
+    char* rpn = "10.3 20.1 + 31 + 491.3 -";
+    
 //    char* expression = "3 + 4 * 2 / ( 1 - 5)";
 //    char* rpn = "3 4 2 * 1 5 - / +";
     
-    char* expression = "((3 + 4) * 2 - 7) / 13";
-    char* rpn = "3 4 2 * + 7 - 13 /";
+//    char* expression = "((3 + 4) * 2 - 7) / 13";
+//    char* rpn = "3 4 + 2 * 7 - 13 /";
     
     double result = create_rpn(expression, strlen(expression));
     
