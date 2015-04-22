@@ -101,7 +101,10 @@ double evaulate_rpn(char** exp, size_t len) {
             place++ ;
         }
     }
-    return stack[0]; // result here
+    float res = stack[0];
+    
+    free(stack);
+    return res; // result here
 }
 
 
@@ -220,7 +223,7 @@ double create_rpn(char* exp, size_t len){
 //                printf(".result str: ");
 //                print_strings(reverse, used_lines);
                 
-            } else if (*buffer == ' ') {
+            } else if (*buffer == ' ' || *buffer == '\n') {
                 // ignore this case
             } else if (*buffer == 0) {
                 //printf("EOF - push %zu from stack\n", stack_top);
@@ -235,8 +238,7 @@ double create_rpn(char* exp, size_t len){
         }
         
         if (bracket_deep < 0) {
-            printf("[error]");
-//            printf("--wrong bracket expr!\n");
+            printf("[error]"); // printf("--wrong bracket expr!\n");
             exit(0);
         }
         index++ ;
@@ -250,8 +252,13 @@ double create_rpn(char* exp, size_t len){
 //        printf("\nout result str:\n");
 //        print_strings(reverse, used_lines);
         
-        return evaulate_rpn(reverse, used_lines);
-//        return 0.0;
+        float res = evaulate_rpn(reverse, used_lines);
+        for (int i = 0; i < used_lines; ++i) {
+            free(reverse[i]);
+        }
+        free(reverse);
+        
+        return res;
     } else {
         // wrong brackets
         printf("[error] - wrong brackets");
