@@ -22,11 +22,6 @@
 
 #define MAX_LEN 1024
 
-void print_strings(char** , size_t);
-
-void print_chars(char* , size_t);
-
-
 // needs to check priority
 int get_power(char* exp, size_t i) {
     if (strncmp(&exp[i], "+", 1) == 0) {
@@ -55,21 +50,10 @@ int get_power(char* exp, size_t i) {
     }*/
 }
 
-/*
-// checks if current char is operator
-int is_operator(char* exp, size_t i) {
-    if (strncmp(&exp[i], "+", 1) == 0 || strncmp(&exp[i], "-", 1) == 0 ||
-        strncmp(&exp[i], "*", 1) == 0 || strncmp(&exp[i], "/", 1) == 0) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-*/
 
 // checks if current char is operator
 int is_operator(char op) {
-    if (op == '+' || op == '-' || op == '*' || op == '/' || op == 'm') {
+    if (op == '+' || op == '-' || op == '*' || op == '/') {
         return 1;
     } else {
         return 0;
@@ -167,21 +151,35 @@ void push_to_stack(char*** reverse, size_t* inited_lines, size_t* used_lines, ch
 double create_rpn(char* exp, size_t len){
     
     // stack of chars for operands ()+-*/
-    char* stack = (char* ) malloc(len*sizeof(char));
+    char* stack = (char* ) malloc(len);
+    if (stack == NULL) {
+        printf("[error]");
+        exit(0);
+    }
     size_t stack_top = 0;  // position of last item in stack
     
     // array of numbers
     size_t inited_lines = 1;
     size_t used_lines = 0;
     char** reverse = (char** ) malloc(inited_lines*sizeof(char* ));
-    char* buffer = (char* ) malloc(1); // for one current char
+    if (reverse == NULL) {
+        printf("[error]");
+        exit(0);
+    }
+    
+    char* buffer = (char* ) malloc(2); // for one current char
+    if (buffer == NULL) {
+        printf("[error]");
+        exit(0);
+    }
     
     int bracket_deep = 0;
     int digit = 0; // flag to start parsing Numbers/digits
     size_t start_index = 0; // for parsing Long-Vals
     size_t index = 0;
     while (index <= len) {
-        memcpy(buffer, &exp[index], 1); // buffer constats only 1 char but it is a string
+        buffer[0] = exp[index];  // buffer constats only 1 char but it is a string
+        buffer[1] = '\0'; // ? fix
         
         if (is_digit(*buffer) == 1) {
             // save first digit place
@@ -195,13 +193,10 @@ double create_rpn(char* exp, size_t len){
                 digit = 0;
                 size_t size = index - start_index; // size of str
                 push_to_stack(&reverse, &inited_lines, &used_lines, exp + start_index, size);
-                
-//                printf("\nRPN: ");
-//                print_strings(reverse, used_lines);
             }
             
             // push Operands + check priority
-            if (is_operator(*buffer) == 1) {
+            if (is_operator(*buffer) == 1) {        // <---
                 size_t power = get_power(buffer, 0);
                 for (int i = stack_top - 1; i >= 0; --i) {
                     if (stack[i] == '(') {
@@ -213,44 +208,28 @@ double create_rpn(char* exp, size_t len){
                     }
                 }
                 // push current Operand to stack
-                stack[stack_top++ ] = buffer[0];
+                stack[stack_top++ ] = *buffer;
                 
-//                printf("\n~stack now: ");
-//                print_chars(stack, stack_top);
-//
-//                printf("~result updated: ");
-//                print_strings(reverse, used_lines);
-                
-            } else if (strcmp(buffer, "(") == 0) {
-                stack[stack_top++ ] = buffer[0];
+            } else if (*buffer == '(') {
+                stack[stack_top++ ] = *buffer;
                 bracket_deep++ ;
                 
-//                printf("-stack now: ");
-//                print_chars(stack, stack_top);
-            } else if (strcmp(buffer, ")") == 0) {
+            } else if (*buffer == ')') {
                 // push operands to result
                 bracket_deep-- ;
                 stack_top-- ; // if no, '' will be added to output
                 while (stack[stack_top] != '(') {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[stack_top], 1);
-                    //printf("current item '%c', stack size: %zu\n", stack[stack_top], stack_top);
                     if (stack_top > 0) {
                         stack_top-- ;
                     } else {
                         break;
                     }
                 }
-                
-//                printf(".stack check: ");
-//                print_chars(stack, stack_top);
-//                
-//                printf(".result str: ");
-//                print_strings(reverse, used_lines);
-                
-            } else if (strcmp(buffer, " ") == 0 || strcmp(buffer, "\n") == 0) {
+            } else if (*buffer == ' ' || *buffer == '\n') {   // <---
                 // ignore this case
                 
-            } else if (strcmp(buffer, "\0") == 0) {
+            } else if (*buffer == '\0') {    // <---
                 for (int i = stack_top - 1; i >= 0; --i) {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                 }
@@ -270,12 +249,6 @@ double create_rpn(char* exp, size_t len){
     free(stack);
     
     if (bracket_deep == 0) {
-//        printf("\nout stack check:\n");
-//        print_chars(stack, stack_top);
-//        
-//        printf("\nout result str:\n");
-//        print_strings(reverse, used_lines);
-        
         double res = evaulate_rpn(reverse, used_lines);
         for (int i = 0; i < inited_lines; i++) {
             free(reverse[i]);
@@ -309,22 +282,4 @@ int main() {
     }
     free(expression);
     return 0;
-}
-
-
-///// DEBUG PRINTING FUNCTIONS /////
-
-void print_strings(char** array, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-        printf("%s ", array[i]);
-    }
-    printf("\n");
-}
-
-
-void print_chars(char* array, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-        printf("%c", array[i]);
-    }
-    printf("\n");
 }
