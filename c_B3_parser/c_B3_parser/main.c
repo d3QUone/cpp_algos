@@ -37,8 +37,6 @@ size_t get_power(char op) {
         return 4;
     } else if (op == '/') {
         return 4;
-    } else if (op == 'm') {
-        return 5;  // let unary minus has max priority ???? absolutly not tested
     } else {
         return 0;
     }
@@ -80,16 +78,27 @@ double evaulate_rpn(char** exp, size_t len) {
                 a1 = stack[place - 2];
                 a2 = stack[place - 1];
                 
-                if (strncmp(exp[i], "+", 1) == 0)
+                if (strncmp(exp[i], "+", 1) == 0) {
                     stack[place - 2] = a1 + a2;
-                else if (strncmp(exp[i], "-", 1) == 0)
+                } else if (strncmp(exp[i], "-", 1) == 0) {
                     stack[place - 2] = a1 - a2;
-                else if (strncmp(exp[i], "*", 1) == 0)
+                } else if (strncmp(exp[i], "*", 1) == 0) {
                     stack[place - 2] = a1 * a2;
-                else if (strncmp(exp[i], "/", 1) == 0)
+                } else if (strncmp(exp[i], "/", 1) == 0) {
                     stack[place - 2] = a1 / a2;
-                
+                }
                 place -= 1;
+                
+            } else if (place == 1) {
+                // unary minus, unary plus..
+                a1 = stack[place - 1];
+                
+                if (strncmp(exp[i], "-", 1) == 0) {
+                    stack[place - 1] = 0 - a1;
+                } else if (strncmp(exp[i], "+", 1) == 0) {
+                    stack[place - 1] = a1;
+                }
+                
             } else {
                 // wrong order / anything else
                 printf("[error]");
@@ -102,7 +111,6 @@ double evaulate_rpn(char** exp, size_t len) {
         }
     }
     float res = stack[0];
-    
     free(stack);
     return res; // result here
 }
@@ -136,7 +144,7 @@ void push_to_stack(char*** reverse, size_t* inited_lines, size_t* used_lines, co
 // transform from Infix to Postfix notation
 double create_rpn(char* exp, size_t len){
     //printf("Exp: %s, %zu chars\n", exp, len);
-    int bracket_deep = 0; // ? may be no need // check inside Stack repush
+    int bracket_deep = 0;
     
     // stack of chars for operands ()+-*/
     char* stack = (char* ) malloc(len*sizeof(char));
@@ -236,7 +244,6 @@ double create_rpn(char* exp, size_t len){
                 exit(0);
             }
         }
-        
         if (bracket_deep < 0) {
             printf("[error]"); // printf("--wrong bracket expr!\n");
             exit(0);
@@ -253,7 +260,7 @@ double create_rpn(char* exp, size_t len){
 //        print_strings(reverse, used_lines);
         
         float res = evaulate_rpn(reverse, used_lines);
-        for (int i = 0; i < used_lines; ++i) {
+        for (int i = 0; i < inited_lines; ++i) {
             free(reverse[i]);
         }
         free(reverse);
