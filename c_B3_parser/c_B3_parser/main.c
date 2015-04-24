@@ -251,13 +251,12 @@ int main() {
                 len++ ;
             }
         }
-        //expression[len] = '\0';
         double result = create_rpn(expression, len);
         printf("%.2f", result);
+        free(expression);
     } else {
         printf("[error]");
         exit(0);
     }
-    free(expression);
     return 0;
 }
