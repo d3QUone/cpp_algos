@@ -23,20 +23,7 @@
 #define MAX_LEN 1024
 
 // needs to check priority
-int get_power(char* exp, size_t i) {
-    if (strncmp(&exp[i], "+", 1) == 0) {
-        return 2;
-    } else if (strncmp(&exp[i], "-", 1) == 0) {
-        return 2;
-    } else if (strncmp(&exp[i], "*", 1) == 0) {
-        return 4;
-    } else if (strncmp(&exp[i], "/", 1) == 0) {
-        return 4;
-    } else {
-        return 0;
-    }
-    
-    /*
+int get_power(char op) {
     if (op == '+') {
         return 2;
     } else if (op == '-') {
@@ -47,7 +34,7 @@ int get_power(char* exp, size_t i) {
         return 4;
     } else {
         return 0;
-    }*/
+    }
 }
 
 
@@ -167,21 +154,15 @@ double create_rpn(char* exp, size_t len){
         exit(0);
     }
     
-    char* buffer = (char* ) malloc(2); // for one current char
-    if (buffer == NULL) {
-        printf("[error]");
-        exit(0);
-    }
+    char buffer;
     
     int bracket_deep = 0;
     int digit = 0; // flag to start parsing Numbers/digits
     size_t start_index = 0; // for parsing Long-Vals
     size_t index = 0;
     while (index <= len) {
-        buffer[0] = exp[index];  // buffer constats only 1 char but it is a string
-        buffer[1] = '\0'; // ? fix
-        
-        if (is_digit(*buffer) == 1) {
+        buffer = exp[index];  // buffer constats only 1 char but it is a string
+        if (is_digit(buffer) == 1) {
             // save first digit place
             if (digit == 0) {
                 start_index = index;
@@ -196,25 +177,25 @@ double create_rpn(char* exp, size_t len){
             }
             
             // push Operands + check priority
-            if (is_operator(*buffer) == 1) {        // <---
-                size_t power = get_power(buffer, 0);
+            if (is_operator(buffer) == 1) {
+                size_t power = get_power(buffer);
                 for (int i = stack_top - 1; i >= 0; --i) {
                     if (stack[i] == '(') {
                         break;
                     }
-                    if (get_power(stack, i) >= power) {
+                    if (get_power(stack[i]) >= power) {
                         push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                         stack_top-- ;
                     }
                 }
                 // push current Operand to stack
-                stack[stack_top++ ] = *buffer;
+                stack[stack_top++ ] = buffer;
                 
-            } else if (*buffer == '(') {
-                stack[stack_top++ ] = *buffer;
+            } else if (buffer == '(') {
+                stack[stack_top++ ] = buffer;
                 bracket_deep++ ;
                 
-            } else if (*buffer == ')') {
+            } else if (buffer == ')') {
                 // push operands to result
                 bracket_deep-- ;
                 stack_top-- ; // if no, '' will be added to output
@@ -226,10 +207,10 @@ double create_rpn(char* exp, size_t len){
                         break;
                     }
                 }
-            } else if (*buffer == ' ' || *buffer == '\n') {   // <---
+            } else if (buffer == ' ' || buffer == '\n') {
                 // ignore this case
                 
-            } else if (*buffer == '\0') {    // <---
+            } else if (buffer == '\0') {
                 for (int i = stack_top - 1; i >= 0; --i) {
                     push_to_stack(&reverse, &inited_lines, &used_lines, &stack[i], 1);
                 }
@@ -245,7 +226,6 @@ double create_rpn(char* exp, size_t len){
         }
         index++ ;
     }
-    free(buffer);
     free(stack);
     
     if (bracket_deep == 0) {
@@ -266,14 +246,12 @@ int main() {
     char* expression = (char* ) malloc(MAX_LEN*sizeof(char));
     if (expression) {
         size_t len = 0;
-        while (scanf("%c", &expression[len]) != -1) {
-            // switch to getch ???
-            
-            if (expression[len] != ' ') {
-                // save everything except spaces
+        while (scanf("%c", &expression[len]) != -1) {   // switch to getch ???
+            if (expression[len] != ' ') {   // save everything except spaces
                 len++ ;
             }
         }
+        //expression[len] = '\0';
         double result = create_rpn(expression, len);
         printf("%.2f", result);
     } else {
