@@ -229,7 +229,7 @@ double create_rpn(char* exp, size_t len){
     
     if (bracket_deep == 0) {
         double res = evaulate_rpn(reverse, used_lines);
-        for (int i = 0; i < inited_lines; i++) {
+        for (int i = 0; i < used_lines; i++) {
             free(reverse[i]);
         }
         free(reverse);
