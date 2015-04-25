@@ -9,12 +9,89 @@
 #include <iostream>
 
 
+// merging - OK
 template <class T>
-void merge_sort(T* array, int size, int k) {
-    
+void merge_two_arrays(T* result, T* array1, T* array2, int size1, int size2) {
+    int i = 0; 
+    int j = 0;
+    for (; i < size1 && j < size2;) {
+        if (array1[i] < array2[j]) {
+            result[i + j] = array1[i];
+            i++ ;
+        } else {
+            result[i + j] = array2[j];
+            j++ ;
+        }
+    }
+    // load lest data if any  
+    if (i == size1) {
+        for (; j < size2; ++j) {
+            result[i + j] = array2[j];
+        }
+    } else if (j == size2) {
+        for (; i < size1; ++i) {
+            result[i + j] = array1[i];
+        }
+    }
 }
 
 
+template <class T>
+void merge_sort(T* array, int size, int k) {
+    T* buf = new T[size];
+
+    int stop;   // buffer for end index
+    for (int i = k; i < size; i += k) {
+        int sorted = 0;
+        
+        // array[sorted..(sorted+i)] + array[(sorted+i)..(sorted + 2*i) OR end]
+        for (; sorted + i < size; sorted += 2*i) {
+            
+            // find end index for second part
+            if (i < size - i - sorted) {
+                stop = i;
+            } else {
+                stop = size - i - sorted;
+            }
+                             // res             arr1            arr2             len1  len2
+            merge_two_arrays<T>(buf + sorted, array + sorted, array + sorted + i, i, stop);
+        }
+
+        // copy the rest items
+        for (int j = sorted; j < size; ++j) {
+            buf[j] = array[j];
+        }
+
+        // rewrite this sorted part
+        for (int j = 0; j < size; ++j) {
+            array[j] = buf[j];
+        }
+
+        std::cout << "count=" << size << "; ";
+        for (int i = 0; i < size; ++i) {
+           std::cout << array[i] << " ";
+        } std::cout << "\n";
+    }
+    delete [] buf;
+}
+
+
+/*
+template <class T>
+void SORT(T* array, int size, int k) {
+    int last = 0;
+    if (k < size) {
+        last = k;
+    } else {
+        last = k - size;
+    }
+    merge_sort(array, k);
+    for (int i = k; i < size; i += k) {
+        merge_sort(array + i, k); // sort all k's
+        merge_two_arrays(array, array, array + i, k, last);
+    }
+}
+*/
 
 int main(){
     int n = 0;
@@ -26,9 +103,19 @@ int main(){
         std::cin >> array[i];
     }
     
+    
+//    int a1[] = {1, 2, 3, 9};
+//    int a2[] = {4, 5, 6};
+//    int* res = new int[7];
+//    merge_two_arrays(res, a2, a1, 3, 4);
+    
+    
     merge_sort<int>(array, n, k);
+    //SORT<int>(array, n, k);
     
     for (int i = 0; i < n; ++i) {
-        std::cout << array[i];
+        std::cout << array[i] << " ";
     }
+    delete [] array;
+    return 0;
 }
