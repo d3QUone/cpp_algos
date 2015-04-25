@@ -37,23 +37,20 @@ void merge_two_arrays(T* result, T* array1, T* array2, int size1, int size2) {
 
 
 template <class T>
-void merge_sort(T* array, int size, int k) {
+void merge_sort(T* array, int size) {
     T* buf = new T[size];
-
     int stop;   // buffer for end index
-    for (int i = k; i < size; i += k) {
+    for (int i = 1; i < size; i *= 2) {
         int sorted = 0;
-        
         // array[sorted..(sorted+i)] + array[(sorted+i)..(sorted + 2*i) OR end]
         for (; sorted + i < size; sorted += 2*i) {
-            
             // find end index for second part
             if (i < size - i - sorted) {
                 stop = i;
             } else {
                 stop = size - i - sorted;
             }
-                             // res             arr1            arr2             len1  len2
+                             // res           arr1            arr2              len1  len2
             merge_two_arrays<T>(buf + sorted, array + sorted, array + sorted + i, i, stop);
         }
 
@@ -67,16 +64,15 @@ void merge_sort(T* array, int size, int k) {
             array[j] = buf[j];
         }
 
-        std::cout << "count=" << size << "; ";
-        for (int i = 0; i < size; ++i) {
-           std::cout << array[i] << " ";
-        } std::cout << "\n";
+//        std::cout << "count=" << size << "; ";
+//        for (int i = 0; i < size; ++i) {
+//           std::cout << array[i] << " ";
+//        } std::cout << "\n";
     }
     delete [] buf;
 }
 
 
-/*
 template <class T>
 void SORT(T* array, int size, int k) {
     int last = 0;
@@ -91,7 +87,8 @@ void SORT(T* array, int size, int k) {
         merge_two_arrays(array, array, array + i, k, last);
     }
 }
-*/
+
+
 
 int main(){
     int n = 0;
@@ -103,15 +100,8 @@ int main(){
         std::cin >> array[i];
     }
     
-    
-//    int a1[] = {1, 2, 3, 9};
-//    int a2[] = {4, 5, 6};
-//    int* res = new int[7];
-//    merge_two_arrays(res, a2, a1, 3, 4);
-    
-    
-    merge_sort<int>(array, n, k);
-    //SORT<int>(array, n, k);
+    //merge_sort<int>(array, n);
+    SORT<int>(array, n, n);
     
     for (int i = 0; i < n; ++i) {
         std::cout << array[i] << " ";

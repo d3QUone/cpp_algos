@@ -154,8 +154,7 @@ double create_rpn(char* exp, size_t len){
         exit(0);
     }
     
-    char buffer;
-    
+    char buffer = 0;
     int bracket_deep = 0;
     int digit = 0; // flag to start parsing Numbers/digits
     size_t start_index = 0; // for parsing Long-Vals
@@ -251,6 +250,7 @@ int main() {
                 len++ ;
             }
         }
+        expression[len] = '\0';  // missing this was my great fuckup
         double result = create_rpn(expression, len);
         printf("%.2f", result);
         free(expression);

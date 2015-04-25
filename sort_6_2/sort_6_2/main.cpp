@@ -67,7 +67,6 @@ int main(){
     }
     
     LSD(input, n, inp_min);
-    //std::cout << "Result: ";
     for (int i = 0; i < n; ++i) {
         std::cout << input[i] << " ";
     }
