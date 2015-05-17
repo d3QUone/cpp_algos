@@ -67,6 +67,7 @@ void merge_sort(T* arr, int len, bool (*is_less)(const T&, const T&)) {
             }
         }
     }
+    delete buf;
 }
 
 

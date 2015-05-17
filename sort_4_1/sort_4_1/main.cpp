@@ -78,7 +78,7 @@ T find_K_stat(T* array, int asize, int k, bool (*is_less)(const T&, const T&)) {
 }
 
 
-
+/*
 int main_test() {
 //    int n = 8;
 //    int array[] = {2, 8, 7, 1, 3, 26, 5, 40};
@@ -105,6 +105,7 @@ int main_test() {
     }
     return 0;
 }
+*/
 
 /*
 int maixvcxn(){
@@ -127,5 +128,6 @@ int main() {
         std::cin >> array[i];
     }
     std::cout << find_K_stat<int>(array, n, k, compare_ints);
+    delete [] array;
     return 0;
 }

@@ -63,11 +63,6 @@ void merge_sort(T* array, int size) {
         for (int j = 0; j < size; ++j) {
             array[j] = buf[j];
         }
-
-//        std::cout << "count=" << size << "; ";
-//        for (int i = 0; i < size; ++i) {
-//           std::cout << array[i] << " ";
-//        } std::cout << "\n";
     }
     delete [] buf;
 }
@@ -100,8 +95,7 @@ int main(){
         std::cin >> array[i];
     }
     
-    //merge_sort<int>(array, n);
-    SORT<int>(array, n, n);
+    SORT<int>(array, n, k);
     
     for (int i = 0; i < n; ++i) {
         std::cout << array[i] << " ";
