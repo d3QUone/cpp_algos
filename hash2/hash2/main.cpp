@@ -31,8 +31,10 @@ public:
     void PrintPostOrder();
 private:
     Node* root;
-    void clear(Node* );
+    void clear(Node*& );
     void PrintContent(Node* );
+    
+    void AddRecoursive(int, Node*&);
 };
 
 
@@ -41,14 +43,15 @@ BinTree::~BinTree() {
 }
 
 
-void BinTree::clear(Node* root_item) {
+void BinTree::clear(Node*& root_item) {
     if (root_item->Left != NULL) {
         clear(root_item->Left);
-        delete root_item;
-        root_item = NULL;
     }
     if (root_item->Right != NULL) {
         clear(root_item->Right);
+    }
+    
+    if (root_item) {
         delete root_item;
         root_item = NULL;
     }
@@ -56,37 +59,20 @@ void BinTree::clear(Node* root_item) {
 
 
 void BinTree::Add(int k) {
-    Node* leaf = new Node(k);
-    if (root == NULL) {
-        root = leaf;
-        delete leaf;
-        leaf = NULL;
+    AddRecoursive(k, root);
+}
+
+
+void BinTree::AddRecoursive(int k, Node*& node) {
+    if (node == NULL) {
+        node = new Node(k);
         return;
     }
-    Node* place = new Node(root);
-    while (place != NULL) {
-        if (leaf->Key > place->Key) {
-            if (place -> Right != NULL) {
-                place = place -> Right;
-            } else {
-                place -> Right = leaf;
-                break;
-            }
-        } else {
-            if (place -> Left != NULL) {
-                place = place -> Left;
-            } else {
-                place -> Left = leaf;
-                break;
-            }
-        }
+    if (node -> Key > k) {
+        AddRecoursive(k, node -> Left);
+    } else {
+        AddRecoursive(k, node -> Right);
     }
-//    root = place;
-    
-    delete leaf;
-    leaf = NULL;
-    delete place;
-    place = NULL;
 }
 
 
@@ -111,17 +97,17 @@ void BinTree::PrintPostOrder() {
 int main() {
     BinTree* tree = new BinTree();
     
-    tree -> Add(2); // first item will be root
-    tree -> Add(1);
-    tree -> Add(3);
+//    tree -> Add(2); // first item will be root
+//    tree -> Add(1);
+//    tree -> Add(3);
     
-//    int n = 0;
-//    std::cin >> n;
-//    int buf;
-//    for (int i = 0; i < n; ++i) {
-//        std::cin >> buf;
-//        tree -> Add(buf);
-//    }
+    int n = 0;
+    std::cin >> n;
+    int buf;
+    for (int i = 0; i < n; ++i) {
+        std::cin >> buf;
+        tree -> Add(buf);
+    }
     tree -> PrintPostOrder();
     
     delete tree;
