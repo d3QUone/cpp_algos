@@ -4,6 +4,14 @@
 
 using namespace std;
 
+
+struct CData {
+    string data;
+    int flag; // -1: deleted, 0: empty, 1: busy
+};
+
+
+
 class HASHTABLE {
 public:
     HASHTABLE();
@@ -15,18 +23,10 @@ private:
     double loadFactor;
     int initSize;
     int usedSize;
-    
-    vector<string> table;
-    /**
-     @brief Stores status of every item
-     @return -1: deleted
-     @return 0: empty
-     @return 1: has data
-    */
-    vector<int> status;
-    
+    vector<CData> table;
     int getHash(const string&, size_t);
     void growTable();
+    bool performAdd(std::vector<CData>&, const string&);
 };
 
 
@@ -35,18 +35,16 @@ HASHTABLE::HASHTABLE() {
     initSize = 8;
     usedSize = 0;
     
-    table = vector<string>(initSize);
-    status = vector<int>(initSize);
+    table = vector<CData>(initSize);
 }
 
 
 HASHTABLE::~HASHTABLE() {
     table.clear();
-    status.clear();
 }
 
 
-//                              -- value -- table size --
+//                                value   table size
 int HASHTABLE::getHash(const string& data, size_t m) {
     int result = 0;
     for (int i = 0; i < static_cast<int>(data.length()); ++i) {
@@ -56,32 +54,11 @@ int HASHTABLE::getHash(const string& data, size_t m) {
 }
 
 
-void HASHTABLE::growTable() {
-    vector<string> newTable(table.size() * 2);
-    vector<int> newStatus(status.size() * 2);
-    
-    for (int j = 0; j < table.size(); ++j) {
-        int hash = getHash(table[j], newTable.size());
-        for (int i = 0; i < newTable.size(); ++i){
-            int actual_hash = (hash + i*(i + 1)/2) % table.size();
-            if (newStatus[actual_hash] == 0 && newTable[actual_hash] != table[j]){
-                newTable[actual_hash] = table[j];
-                newStatus[actual_hash] = 1; // means the place is busy
-                break;
-            }
-        }
-    }
-    table = newTable;
-    status = newStatus;
-    std::cout << " # grow # ";
-}
-
-
 bool HASHTABLE::Has(const string& data){
     int hash = getHash(data, table.size());
     for (int i = 0; i < table.size(); ++i){
         int actual_hash = (hash + i*(i + 1)/2) % table.size();
-        if (table[actual_hash]==data && status[actual_hash]==1) {
+        if (table[actual_hash].data == data && table[actual_hash].flag == 1) {
             return true;
         }
     }
@@ -90,23 +67,7 @@ bool HASHTABLE::Has(const string& data){
 
 
 bool HASHTABLE::Add(const string& data){
-    if (usedSize + 1 > loadFactor * table.size()) {
-        growTable();
-    }
-    int hash = getHash(data, table.size());
-    for (int i = 0; i < table.size(); ++i){
-        int actual_hash = (hash + i*(i + 1)/2) % table.size();
-        if (status[actual_hash]==1 && table[actual_hash] == data) {
-            return false;
-        }
-        if (status[actual_hash]==0 && table[actual_hash] != data){
-            table[actual_hash] = data;
-            status[actual_hash] = 1;
-            ++usedSize;
-            return true;
-        }
-    }
-    return false;
+    return performAdd(table, data);
 }
 
 
@@ -114,9 +75,41 @@ bool HASHTABLE::Delete(const string& data){
     int hash = getHash(data, table.size());
     for (int i = 0; i < table.size(); ++i){
         int actual_hash = (hash + i*(i + 1)/2) % table.size();
-        if (table[actual_hash] == data && status[actual_hash]==1){
-            status[actual_hash] = -1;
-            --usedSize;
+        if (table[actual_hash].data == data){
+            table[actual_hash].flag = -1;
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+void HASHTABLE::growTable() {
+    vector<CData> newTable(table.size() * 2);
+    for (int i = 0; i < table.size(); ++i) {
+        if (table[i].flag == 1) {
+            performAdd(newTable, table[i].data);
+        }
+    }
+    table = newTable;
+}
+
+
+bool HASHTABLE::performAdd(std::vector<CData>& tab, const string& data) {
+    if (usedSize + 1 > loadFactor * tab.size()) {
+        growTable();
+    }
+    int hash = getHash(data, tab.size());
+    for (int i = 0; i < tab.size(); ++i){
+        int actual_hash = (hash + i*(i + 1)/2) % tab.size();
+        if (tab[actual_hash].data == data) {
+            return false;
+        }
+        if (tab[actual_hash].flag == 0){
+            tab[actual_hash].data = data;
+            tab[actual_hash].flag = 1;
+            ++usedSize;
             return true;
         }
     }
@@ -126,6 +119,7 @@ bool HASHTABLE::Delete(const string& data){
 
 int main() {
     HASHTABLE tab;
+    
     /*
     for (int i = 0; i < 40; i++) {
         std::cout << "+" << std::to_string(i) << (tab.Add(std::to_string(i)) ? " OK" : " FAIL") << std::endl;
@@ -147,7 +141,6 @@ int main() {
     for (int i = 0; i < 45; i++) {
         std::cout << "?" << std::to_string(i) << (tab.Has(std::to_string(i)) ? " OK" : " FAIL") << std::endl;
     }*/
-    
     
     char operation;
     string word;
