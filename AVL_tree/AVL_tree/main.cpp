@@ -15,7 +15,7 @@ struct Node {
     Node* Left;
     Node* Right;
     
-    Node(int k): Key(k), Left(NULL), Right(NULL), Height(1) {}
+    Node(int k): Key(k), Left(NULL), Right(NULL), Height(0) {}
     
     Node(Node* do_copy) {
         Key = do_copy -> Key;
@@ -28,7 +28,7 @@ struct Node {
 
 class AVL_tree {
 public:
-    AVL_tree();
+    AVL_tree(){};
     ~AVL_tree();
     void Add(int);
     void Delete(int);
@@ -41,7 +41,31 @@ private:
     void UpdateHeight(Node*&);
     void AddRecursioly(Node*&, int);
     void DeleteRecursioly(Node*&, int);
+    int nodeHeight(Node*);
+    Node* getMinNode(Node*);
+    Node* removeMinNode(Node*);
+    void Clear(Node* node);
 };
+
+
+AVL_tree::~AVL_tree() {
+    Clear(root);
+}
+
+
+// recursive cleaning....
+void AVL_tree::Clear(Node* node) {
+    if (node -> Left != NULL) {
+        Clear(node -> Left);
+        delete node -> Left;
+        node -> Left = NULL;
+    }
+    if (node -> Right != NULL) {
+        Clear(node -> Right);
+        delete node -> Right;
+        node -> Right = NULL;
+    }
+}
 
 
 // Add-interface
@@ -69,9 +93,61 @@ void AVL_tree::Delete(int value) {
 }
 
 
+Node* AVL_tree::getMinNode(Node* node) {
+    return node -> Left ? getMinNode(node -> Left) : node;
+}
+
+
+Node* AVL_tree::removeMinNode(Node* node) {
+    if (node -> Left == NULL) {
+        return node -> Right;
+    } else {
+        node -> Left = removeMinNode(node -> Left);
+        Balance(node);
+        return node;
+    }
+}
+
+
 // Delete-realisation
 void AVL_tree::DeleteRecursioly(Node*& node, int value) {
-    
+    if (node != NULL) {
+        if (value < node -> Key) {
+            DeleteRecursioly(node -> Left, value);
+            Balance(node);
+        } else if (value > node -> Key) {
+            DeleteRecursioly(node -> Right, value);
+            Balance(node);
+        } else {
+            Node* Lbuf = node -> Left;
+            Node* Rbuf = node -> Right;
+            if (Rbuf == NULL) {
+                node = Lbuf;
+            } else {
+                Node* minNode = getMinNode(Rbuf);
+                minNode -> Right = removeMinNode(Rbuf);
+                minNode -> Left = Lbuf;
+                Balance(minNode);
+                node = minNode;
+            }
+        }
+    }
+}
+
+
+// Height-interface
+int AVL_tree::getHeight() {
+    return nodeHeight(root);
+}
+
+
+// Height-realisation
+int AVL_tree::nodeHeight(Node* node) {
+    if (node == NULL) {
+        return 0;
+    } else {
+        return node -> Height;
+    }
 }
 
 
@@ -79,46 +155,45 @@ void AVL_tree::RotateRight(Node*& node) {
     Node* buf = node -> Left;
     node -> Left = buf -> Right;
     buf -> Right = node;
-    node = buf;
-    UpdateHeight(buf);
     UpdateHeight(node);
+    UpdateHeight(buf);
+    node = buf;
 }
 
 
 void AVL_tree::RotateLeft(Node*& node) {
     Node* buf = node -> Right;
-    node -> Right = buf -> Right;
+    node -> Right = buf -> Left;
     buf -> Left = node;
-    node = buf;
-    UpdateHeight(buf);
     UpdateHeight(node);
+    UpdateHeight(buf);
+    node = buf;
 }
 
 
 void AVL_tree::Balance(Node*& node) {
     UpdateHeight(node);
-    
-    if (node -> Right -> Height - node -> Left -> Height == 2) {
-        
+    if (nodeHeight(node->Right) - nodeHeight(node->Left) == 2) {
+        if (nodeHeight(node->Right->Right) - nodeHeight(node->Right->Left) < 0) {
+            RotateRight(node->Right);
+        }
+        RotateLeft(node);
     }
-    
-    if (node -> Right -> Height - node -> Left -> Height == -2) {
-        
+    if (nodeHeight(node->Right) - nodeHeight(node->Left) == -2) {
+        if (nodeHeight(node->Left->Right) - nodeHeight(node->Left->Left) > 0) {
+            RotateLeft(node->Left);
+        }
+        RotateRight(node);
     }
 }
 
 
 void AVL_tree::UpdateHeight(Node*& node) {
-    if (node->Left->Height > node->Right->Height) {
-        node->Height = node->Left->Height + 1;
+    if (nodeHeight(node->Left) > nodeHeight(node->Right)) {
+        node->Height = nodeHeight(node->Left) + 1;
     } else {
-        node->Height = node->Right->Height + 1;
+        node->Height = nodeHeight(node->Right) + 1;
     }
-}
-
-
-int AVL_tree::getHeight() {
-    return root -> Height;
 }
 
 
@@ -132,7 +207,7 @@ int main() {
         if (data > 0) {
             tree -> Add(data);
         } else {
-            tree -> Delete(data);
+            tree -> Delete(-1*data);
         }
     }
     std::cout << tree -> getHeight() << "\n";
