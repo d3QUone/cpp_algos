@@ -14,15 +14,7 @@ struct Node {
     int Height;
     Node* Left;
     Node* Right;
-    
     Node(int k): Key(k), Left(NULL), Right(NULL), Height(0) {}
-    
-    Node(Node* do_copy) {
-        Key = do_copy -> Key;
-        Height = do_copy -> Height;
-        Left = do_copy -> Left;
-        Right = do_copy -> Right;
-    }
 };
 
 

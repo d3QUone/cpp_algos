@@ -7,9 +7,11 @@ using namespace std;
 
 struct CData {
     string data;
-    int flag; // -1: deleted, 0: empty, 1: busy
+    int flag;
+    // -1: deleted,
+    //  0: empty,
+    //  1: busy
 };
-
 
 
 class HASHTABLE {
@@ -21,7 +23,6 @@ public:
     bool Has(const string&);
 private:
     double loadFactor;
-    int initSize;
     int usedSize;
     vector<CData> table;
     int getHash(const string&, size_t);
@@ -32,10 +33,8 @@ private:
 
 HASHTABLE::HASHTABLE() {
     loadFactor = 0.75;
-    initSize = 8;
     usedSize = 0;
-    
-    table = vector<CData>(initSize);
+    table = vector<CData>(8);
 }
 
 
@@ -44,7 +43,6 @@ HASHTABLE::~HASHTABLE() {
 }
 
 
-//                                value   table size
 int HASHTABLE::getHash(const string& data, size_t m) {
     int result = 0;
     for (int i = 0; i < static_cast<int>(data.length()); ++i) {
@@ -58,6 +56,9 @@ bool HASHTABLE::Has(const string& data){
     int hash = getHash(data, table.size());
     for (int i = 0; i < table.size(); ++i){
         int actual_hash = (hash + i*(i + 1)/2) % table.size();
+        if (table[actual_hash].flag == 0) {
+            return false;
+        }
         if (table[actual_hash].data == data && table[actual_hash].flag == 1) {
             return true;
         }
@@ -75,7 +76,10 @@ bool HASHTABLE::Delete(const string& data){
     int hash = getHash(data, table.size());
     for (int i = 0; i < table.size(); ++i){
         int actual_hash = (hash + i*(i + 1)/2) % table.size();
-        if (table[actual_hash].data == data){
+        if (table[actual_hash].flag == 0) {
+            return false;
+        }
+        if (table[actual_hash].data == data && table[actual_hash].flag == 1){
             table[actual_hash].flag = -1;
             return true;
         }
@@ -100,20 +104,32 @@ bool HASHTABLE::performAdd(std::vector<CData>& tab, const string& data) {
     if (usedSize + 1 > loadFactor * tab.size()) {
         growTable();
     }
+    int found_index = -1;
     int hash = getHash(data, tab.size());
     for (int i = 0; i < tab.size(); ++i){
         int actual_hash = (hash + i*(i + 1)/2) % tab.size();
-        if (tab[actual_hash].data == data) {
+        if (tab[actual_hash].data == data && tab[actual_hash].flag == 1) {
             return false;
         }
-        if (tab[actual_hash].flag == 0){
-            tab[actual_hash].data = data;
-            tab[actual_hash].flag = 1;
-            ++usedSize;
-            return true;
+        if (tab[actual_hash].flag == -1) {
+            found_index = actual_hash;
+        }
+        if (tab[actual_hash].flag == 0) {
+            if (found_index == -1) {
+                found_index = actual_hash;
+            }
+            break;
         }
     }
-    return false;
+
+    if (found_index != -1) {
+        tab[found_index].data = data;
+        tab[found_index].flag = 1;
+        ++usedSize;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
